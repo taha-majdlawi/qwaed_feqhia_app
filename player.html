@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>القواعد الفقهية</title>
+<style>
+  :root { --bg:#f7f5f0; --card:#fff; --ink:#1f2421; --muted:#6b726d; --accent:#1f6f5c; --hl:#e3f1ec; --line:#e4e1d9; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#161a18; --card:#1f2421; --ink:#ecebe6; --muted:#9aa29d; --accent:#5fbfa3; --hl:#24382f; --line:#2e3532; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:"Traditional Arabic","Amiri","Segoe UI",Tahoma,sans-serif; }
+  .wrap { display:grid; grid-template-columns:260px 1fr; min-height:100vh; }
+  aside { border-left:1px solid var(--line); background:var(--card); padding:16px; position:sticky; top:0; height:100vh; overflow:auto; }
+  aside h1 { font-size:22px; margin:4px 0 14px; color:var(--accent); }
+  .ep { display:flex; justify-content:space-between; gap:8px; width:100%; text-align:right; padding:10px 12px; margin:2px 0; border:0; border-radius:8px; background:none; color:inherit; font:inherit; font-size:18px; cursor:pointer; }
+  .ep:hover { background:var(--hl); }
+  .ep.on { background:var(--accent); color:#fff; }
+  .ep small { opacity:.75; font-size:14px; }
+  main { padding:0 28px 120px; max-width:860px; }
+  .bar { position:sticky; top:0; background:var(--bg); padding:16px 0 12px; border-bottom:1px solid var(--line); z-index:2; }
+  .bar h2 { margin:0 0 10px; font-size:24px; }
+  audio { width:100%; }
+  .row { display:flex; gap:12px; align-items:center; margin-top:8px; color:var(--muted); font-size:15px; }
+  .row label { display:flex; gap:6px; align-items:center; cursor:pointer; }
+  p.par { font-size:22px; line-height:1.9; padding:8px 12px; margin:6px -12px; border-radius:8px; cursor:pointer; transition:background .2s; }
+  p.par:hover { background:var(--hl); }
+  p.par.now { background:var(--hl); box-shadow:inset -3px 0 0 var(--accent); }
+  .t { font-family:ui-monospace,Consolas,monospace; font-size:12px; color:var(--muted); margin-left:8px; direction:ltr; display:inline-block; }
+  @media (max-width:760px) { .wrap { grid-template-columns:1fr; } aside { position:static; height:auto; border-left:0; border-bottom:1px solid var(--line); display:flex; flex-wrap:wrap; gap:4px; } aside h1 { width:100%; } .ep { width:auto; } .ep small { display:none; } main { padding:0 16px 80px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside id="list"><h1>القواعد الفقهية</h1></aside>
+  <main>
+    <div class="bar">
+      <h2 id="title"></h2>
+      <audio id="audio" controls preload="metadata"></audio>
+      <div class="row"><label><input type="checkbox" id="follow" checked> متابعة النص تلقائياً</label><span>· اضغط على أي فقرة للانتقال إليها في الصوت</span></div>
+    </div>
+    <div id="text"></div>
+  </main>
+</div>
+<script src="player-data.js"></script>
+<script>
+const eps = window.EPISODES, list = document.getElementById('list'), audio = document.getElementById('audio'),
+      textEl = document.getElementById('text'), titleEl = document.getElementById('title'), follow = document.getElementById('follow');
+const fmt = s => { s = Math.floor(s); return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); };
+let cur = null, nodes = [], active = -1;
+eps.forEach((e, i) => {
+  const b = document.createElement('button'); b.className = 'ep';
+  b.innerHTML = `<span>الحلقة ${e.number}</span><small>${fmt(e.duration)}</small>`;
+  b.onclick = () => load(i); list.appendChild(b);
+});
+function load(i) {
+  cur = eps[i]; active = -1;
+  [...list.querySelectorAll('.ep')].forEach((b, k) => b.classList.toggle('on', k === i));
+  titleEl.textContent = cur.title; audio.src = cur.audio;
+  textEl.innerHTML = '';
+  nodes = cur.paragraphs.map(p => {
+    const el = document.createElement('p'); el.className = 'par';
+    el.innerHTML = `<span class="t">${fmt(p.start)}</span>`; el.append(p.text);
+    el.onclick = () => { audio.currentTime = p.start; audio.play(); };
+    textEl.appendChild(el); return el;
+  });
+  try { localStorage.setItem('ep', i); } catch (e) {}
+  window.scrollTo(0, 0);
+}
+audio.addEventListener('timeupdate', () => {
+  if (!cur) return; const t = audio.currentTime;
+  let k = cur.paragraphs.findIndex(p => t >= p.start && t < p.end);
+  if (k < 0) return;
+  if (k !== active) {
+    nodes[active]?.classList.remove('now'); nodes[k].classList.add('now'); active = k;
+    if (follow.checked) nodes[k].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+});
+let start = 0; try { start = +localStorage.getItem('ep') || 0; } catch (e) {}
+load(start);
+</script>
+</body>
+</html>
