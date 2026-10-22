@@ -1,6 +1,6 @@
 # حالة المشروع — ورقة تسليم لجلسة جديدة
 
-آخر تحديث: ٢٠٢٦-١٠-٢٢ · المستودع: `taha-majdlawi/qwaed_feqhia_app` · الفرع: `main`
+آخر تحديث: ٢٠٢٦-١٠-٢٢ (جلسة البناء والتشغيل) · المستودع: `taha-majdlawi/qwaed_feqhia_app` · الفرع: `main`
 
 ---
 
@@ -64,22 +64,54 @@ app/lib/
 - `minSdk = 23`، و`android.overridePathCheck=true` في `gradle.properties`
   (كان لازماً لأن مجلد العمل المحلي اسمه عربي — لا يضرّ في بيئة سحابية)
 
-### حالة الترجمة
-`flutter build bundle` يمرّ **بلا أخطاء**. آخر خطأين أُصلحا:
-`PlaybackProgress.positionObject` المفقود، وتعارض اسم `RepeatMode` مع
-`RepeatMode` في Flutter (أُعيدت التسمية إلى `PlaybackRepeatMode`).
+### حالة الترجمة والبناء
+- `flutter analyze` على **Flutter 3.47.7 / Dart 3.13.5**: `No issues found`.
+- `flutter test`: **٣٤ اختباراً** تمرّ كلها (`test/arabic_test.dart`
+  و`test/episode_test.dart`).
+- `flutter build apk --debug`: **يكتمل** — `app-debug.apk` بحجم ١٦٧ م.ب،
+  وتحقّقنا من الحزمة بـ`aapt2`: النشاط المُشغِّل
+  `com.qawaid.qawaid_fiqhiyya.MainActivity`، والاسم «القواعد الفقهية»،
+  وإذن `POST_NOTIFICATIONS` مُعلَن، وخدمة `AudioService` و`MediaButtonReceiver`
+  في المانيفست المدمج، و٤٢ ملف `sync` و٤٢ ملف `text` والخطوط والصور
+  داخل `flutter_assets`. بلا أي تحذير بناء.
+
+آخر خطأين أُصلحا قبل ذلك: `PlaybackProgress.positionObject` المفقود،
+وتعارض اسم `RepeatMode` مع `RepeatMode` في Flutter
+(أُعيدت التسمية إلى `PlaybackRepeatMode`).
+
+> **للبناء في جلسة سحابية جديدة:** الحاوية تأتي فارغة من Flutter و Android SDK،
+> فنزِّل Flutter stable و`commandlinetools` ثم
+> `sdkmanager --install "platform-tools" "platforms;android-36" "build-tools;36.1.0"`
+> (لا يوجد `platforms;android-37`)، واكتب في `app/android/local.properties`
+> سطرَي `flutter.sdk=` و`sdk.dir=`. ونزّلت Gradle نفسها NDK r28c و CMake 3.22.1
+> تلقائياً.
+>
+> و`repo.maven.apache.org` يرُدّ **429 Too Many Requests** على مخرج الشبكة
+> المشترك لهذه الحاويات، فيفشل البناء في حلّ الاعتماديات بلا أي علاقة بالكود.
+> العلاج في `~/.gradle/gradle.properties` (إعداد بيئة، لا يُرفع):
+> ```
+> org.gradle.parallel=false
+> org.gradle.workers.max=2
+> systemProp.org.gradle.internal.repository.max.retries=10
+> systemProp.org.gradle.internal.repository.max.tentatives=10
+> systemProp.org.gradle.internal.repository.initial.backoff=3000
+> ```
+> ولا تُضِف مرآة Maven Central عبر init script: إضافتها إلى مستودعات المشاريع
+> ترفضها AGP 9، وإضافتها إلى `dependencyResolutionManagement` تُهمِل `google()`
+> المعلَنة في `android/build.gradle.kts` فينكسر حلّ AndroidX.
 
 ---
 
 ## ⬜ الباقي — رتّبها بهذا الترتيب
 
-### 1. التشغيل والاختبار الفعلي (لم يحدث بعد — الأهم)
-التطبيق **لم يُشغَّل على أي جهاز بعد**. بناء الـAPK توقّف قبل أن يكتمل.
+### 1. التشغيل على جهاز والتحقّق البصري (لم يحدث بعد — الأهم)
+بناء الـAPK **صار يكتمل** (انظر «حالة الترجمة والبناء» أعلاه)، لكن التطبيق
+**لم يُشغَّل على أي جهاز بعد** — لا جهاز ولا محاكي في البيئة السحابية.
 
 ```bash
 cd app
 flutter pub get
-flutter build apk --debug      # تأكّد أنه يكتمل
+flutter build apk --debug      # يكتمل
 flutter run -d <device>
 ```
 
@@ -107,23 +139,37 @@ gh release create audio-v1 audio/*.m4a --title "ملفات الصوت" --notes "
 قبل الرفع، كل تشغيل سيُظهر رسالة «تعذّر الوصول إلى ملف الصوت» — وهذا متوقَّع.
 لاختبار التزامن قبل الرفع: ضع أي ملف صوتي باسم `ep01.m4a` على خادم وغيّر `audioBaseUrl` مؤقتاً.
 
-### 3. نواقص تقنية معروفة
-- **iOS**: لم يُضَف `UIBackgroundModes: audio` إلى `app/ios/Runner/Info.plist` —
-  بدونه يتوقف الصوت عند إقفال الشاشة.
-- **أندرويد ١٣+**: إذن `POST_NOTIFICATIONS` مُعلن في المانيفست لكن لا يُطلب من المستخدم وقت التشغيل.
-- **ويندوز**: البناء يحتاج Visual Studio بحزمة «Desktop development with C++» (غير مثبّتة على جهاز المالك).
-- **لا توجد اختبارات** — `test/widget_test.dart` الافتراضي محذوف.
-- `flutter analyze` ينهار على جهاز المالك بسبب خلل في `perf_witness`
-  (`Cannot delete file … AppData\Local\Dart\perf`)؛ استُعيض عنه بـ`flutter build bundle`.
-  جرّب `flutter analyze` في البيئة السحابية — غالباً يعمل، وستظهر تحذيرات نظافة (imports غير مستعملة… إلخ).
+### 3. نواقص تقنية
+#### ✅ أُنجزت
+- **iOS**: أُضيف `UIBackgroundModes: audio` إلى `app/ios/Runner/Info.plist`،
+  وصار `CFBundleDisplayName` = «القواعد الفقهية» بدل "Qawaid Fiqhiyya".
+- **أندرويد ١٣+**: `POST_NOTIFICATIONS` يُطلب الآن وقت التشغيل.
+  `MainActivity` صار يمتدّ `AudioServiceActivity` ويوفّر قناة
+  `com.qawaid.fiqhiyya/permissions`، و`services/notification_permission.dart`
+  يطلب الإذن مرّة واحدة من `PlayerController.open()` — وهو المَعبر الوحيد
+  لكل مواضع بدء التشغيل. بلا حزمة خارجية.
+- **الاختبارات**: `test/arabic_test.dart` و`test/episode_test.dart` — ٣٤ اختباراً.
+- **`flutter analyze`**: يعمل في البيئة السحابية بلا مشاكل (الانهيار على جهاز
+  المالك سببه خلل `perf_witness`: `Cannot delete file … AppData\Local\Dart\perf`).
+
+#### ⬜ باقية
+- **ويندوز**: البناء يحتاج Visual Studio بحزمة «Desktop development with C++»
+  (غير مثبّتة على جهاز المالك، ولا تُثبَّت في بيئة لينكس السحابية).
+- **`keepAwake` كود ميّت**: يُحفظ في `storage_service.dart` ويُقرأ في
+  `settings_state.dart`، لكن لا مفتاح له في شاشة الإعدادات ولا أثر له في
+  المشغّل (لا حزمة wakelock في المشروع). فإمّا تُوصَل وإمّا تُحذف.
+- **البحث برقم الحلقة لا يقبل الأرقام العربية**: `LibraryState.visibleEpisodes`
+  يطابق `'${e.number}'.contains(q)` بأرقام لاتينية، والأرقام العربية مفعّلة
+  افتراضياً — فمن يرى «الحلقة ١» ويكتب «١» لا يجد شيئاً.
+- **رابط المستودع في الإعدادات**: `url_launcher` على أندرويد ١١+ يحتاج
+  `<queries><intent><action VIEW/><data android:scheme="https"/></intent></queries>`
+  في المانيفست؛ غير موجود حالياً.
 
 ### 4. أفكار للتحسين (اختيارية، بعد ما سبق)
-- طلب إذن الإشعارات عند أول تشغيل
 - تصدير العلامات والمفضلة إلى ملف نصّي للمشاركة
 - فهرس القواعد الفقهية نفسها (استخراج «القاعدة» من كل حلقة وعرضها كقائمة مستقلة)
 - مشاركة مقطع: صورة اقتباس من فقرة
 - إحصاء كلمات: أكثر القواعد تكراراً في السلسلة
-- اختبارات وحدة لـ`NormalizedText` و`EpisodeTranscript.indexAt`
 
 ---
 
