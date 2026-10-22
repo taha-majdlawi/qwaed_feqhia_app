@@ -101,7 +101,7 @@ class _EpisodesScreenState extends State<EpisodesScreen> {
             padding: const EdgeInsets.fromLTRB(12, 4, 12, 24),
             sliver: SliverList.separated(
               itemCount: episodes.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              separatorBuilder: (_, _) => const SizedBox(height: 10),
               itemBuilder: (context, i) => EpisodeTile(
                 episode: episodes[i],
                 onTap: () => _openEpisode(episodes[i]),

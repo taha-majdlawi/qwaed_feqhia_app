@@ -187,7 +187,7 @@ class _SearchScreenState extends State<SearchScreen> {
               : ListView.separated(
                   padding: const EdgeInsets.fromLTRB(12, 4, 12, 24),
                   itemCount: _hits.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (context, i) => _HitCard(
                     hit: _hits[i],
                     arabicDigits: arabicDigits,
