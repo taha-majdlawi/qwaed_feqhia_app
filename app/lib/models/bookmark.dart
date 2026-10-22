@@ -66,6 +66,9 @@ class PlaybackProgress {
   final DateTime updatedAt;
   final bool completed;
 
+  Duration get positionObject =>
+      Duration(milliseconds: (position * 1000).round());
+
   double get fraction =>
       duration <= 0 ? 0 : (position / duration).clamp(0.0, 1.0);
 

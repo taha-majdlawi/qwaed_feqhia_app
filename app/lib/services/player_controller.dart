@@ -13,7 +13,7 @@ import 'data_repository.dart';
 import 'download_service.dart';
 import 'storage_service.dart';
 
-enum RepeatMode { off, episode, paragraph }
+enum PlaybackRepeatMode { off, episode, paragraph }
 
 /// محرّك التشغيل: يربط الصوت بالنص الموقوت، ويحفظ التقدّم تلقائياً.
 class PlayerController extends ChangeNotifier {
@@ -32,7 +32,7 @@ class PlayerController extends ChangeNotifier {
   EpisodeTranscript? _transcript;
   bool _loading = false;
   String? _error;
-  RepeatMode _repeat = RepeatMode.off;
+  PlaybackRepeatMode _repeat = PlaybackRepeatMode.off;
   Timer? _sleepTimer;
   Duration? _sleepRemaining;
   bool _stopAtEndOfEpisode = false;
@@ -44,7 +44,7 @@ class PlayerController extends ChangeNotifier {
   EpisodeTranscript? get transcript => _transcript;
   bool get isLoading => _loading;
   String? get error => _error;
-  RepeatMode get repeatMode => _repeat;
+  PlaybackRepeatMode get repeatMode => _repeat;
   Duration? get sleepRemaining => _sleepRemaining;
   bool get stopAtEndOfEpisode => _stopAtEndOfEpisode;
   bool get hasEpisode => _episode != null;
@@ -99,7 +99,7 @@ class PlayerController extends ChangeNotifier {
   }
 
   void _maybeRepeatParagraph(Duration pos) {
-    if (_repeat != RepeatMode.paragraph) return;
+    if (_repeat != PlaybackRepeatMode.paragraph) return;
     final t = _transcript;
     final index = currentParagraph.value;
     if (t == null || index < 0 || index >= t.paragraphs.length) return;
@@ -130,11 +130,11 @@ class PlayerController extends ChangeNotifier {
     }
 
     switch (_repeat) {
-      case RepeatMode.episode:
-      case RepeatMode.paragraph:
+      case PlaybackRepeatMode.episode:
+      case PlaybackRepeatMode.paragraph:
         await _player.seek(Duration.zero);
         await _player.play();
-      case RepeatMode.off:
+      case PlaybackRepeatMode.off:
         await playNext();
     }
   }
@@ -269,9 +269,9 @@ class PlayerController extends ChangeNotifier {
 
   void cycleRepeatMode() {
     _repeat = switch (_repeat) {
-      RepeatMode.off => RepeatMode.episode,
-      RepeatMode.episode => RepeatMode.paragraph,
-      RepeatMode.paragraph => RepeatMode.off,
+      PlaybackRepeatMode.off => PlaybackRepeatMode.episode,
+      PlaybackRepeatMode.episode => PlaybackRepeatMode.paragraph,
+      PlaybackRepeatMode.paragraph => PlaybackRepeatMode.off,
     };
     notifyListeners();
   }
