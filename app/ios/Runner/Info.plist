@@ -6,8 +6,9 @@
 		<true/>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
+		<!-- الاسم الظاهر على الشاشة الرئيسية — بالعربية كما في أندرويد -->
 		<key>CFBundleDisplayName</key>
-		<string>Qawaid Fiqhiyya</string>
+		<string>القواعد الفقهية</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -49,6 +50,11 @@
 		</dict>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
+		<!-- لازم لمواصلة تشغيل الصوت عند إقفال الشاشة أو الخروج من التطبيق -->
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>audio</string>
+		</array>
 		<key>UILaunchStoryboardName</key>
 		<string>LaunchScreen</string>
 		<key>UIMainStoryboardFile</key>
