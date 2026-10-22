@@ -11,6 +11,7 @@ import '../models/bookmark.dart';
 import '../models/episode.dart';
 import 'data_repository.dart';
 import 'download_service.dart';
+import 'notification_permission.dart';
 import 'storage_service.dart';
 
 enum PlaybackRepeatMode { off, episode, paragraph }
@@ -152,6 +153,10 @@ class PlayerController extends ChangeNotifier {
     }
 
     await _persistProgress();
+
+    // إشعار التحكّم بالصوت — وهو ما يُبقي التشغيل في الخلفية — لا يظهر على
+    // أندرويد ١٣+ بغير إذن الإشعارات، فيُطلب قبل أوّل تشغيل ومرّة واحدة.
+    await NotificationPermission.ensureGranted();
 
     _loading = true;
     _error = null;

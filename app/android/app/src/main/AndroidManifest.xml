@@ -12,8 +12,10 @@
         android:label="القواعد الفقهية"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
+        <!-- MainActivity يمتدّ AudioServiceActivity (شرط just_audio_background)
+             ويوفّر قناة طلب إذن الإشعارات وقت التشغيل -->
         <activity
-            android:name="com.ryanheise.audioservice.AudioServiceActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""
