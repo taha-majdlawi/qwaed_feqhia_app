@@ -39,3 +39,6 @@ app/windows/flutter/ephemeral/
 *.iml
 .DS_Store
 Thumbs.db
+
+# Kotlin build cache
+app/android/.kotlin/
