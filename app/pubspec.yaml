@@ -26,7 +26,6 @@ dependencies:
   provider: ^6.1.5+1
   just_audio_media_kit: ^2.1.0
   media_kit_libs_windows_audio: ^1.0.9
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

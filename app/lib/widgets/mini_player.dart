@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../core/arabic.dart';
 import '../core/theme.dart';
+import '../state/settings_state.dart';
 import '../screens/player_screen.dart';
 import '../services/player_controller.dart';
 
@@ -66,7 +68,11 @@ class MiniPlayer extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          episode.title,
+                          digits(
+                            episode.title,
+                            arabic: context.select<SettingsState, bool>(
+                                (s) => s.arabicDigits),
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.titleMedium?.copyWith(

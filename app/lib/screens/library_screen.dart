@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -64,8 +66,7 @@ Future<void> _openEpisode(
 }) async {
   final episode = DataRepository.instance.episodeById(episodeId);
   if (episode == null) return;
-  await PlayerController.instance.open(episode, startAt: at);
-  if (!context.mounted) return;
+  unawaited(PlayerController.instance.open(episode, startAt: at));
   await Navigator.of(context).push(
     MaterialPageRoute(builder: (_) => const PlayerScreen()),
   );
@@ -92,7 +93,7 @@ class _FavoritesTab extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
       itemCount: episodes.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      separatorBuilder: (_, _) => const SizedBox(height: 10),
       itemBuilder: (context, i) => EpisodeTile(
         episode: episodes[i],
         onTap: () => _openEpisode(context, episodes[i].id),
@@ -122,7 +123,7 @@ class _BookmarksTab extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
       itemCount: bookmarks.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, i) {
         final bookmark = bookmarks[i];
         final episode = DataRepository.instance.episodeById(bookmark.episodeId);
@@ -258,7 +259,7 @@ class _DownloadsTab extends StatelessWidget {
           child: ListView.separated(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
             itemCount: episodes.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
+            separatorBuilder: (_, _) => const SizedBox(height: 10),
             itemBuilder: (context, i) => EpisodeTile(
               episode: episodes[i],
               onTap: () => _openEpisode(context, episodes[i].id),

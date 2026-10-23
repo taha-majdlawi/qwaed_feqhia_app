@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 
@@ -60,6 +61,25 @@ class PlayerController extends ChangeNotifier {
   Timer? _saveTimer;
   StreamSubscription<Duration>? _positionSub;
   StreamSubscription<PlayerState>? _stateSub;
+  bool _askedForNotifications = false;
+
+  static const MethodChannel _permissions =
+      MethodChannel('com.qawaid.fiqhiyya/permissions');
+
+  /// إشعار التحكّم بالتشغيل يحتاج إذناً صريحاً على أندرويد 13 فما فوق.
+  /// نطلبه عند أول تشغيل فعلي لا عند فتح التطبيق.
+  Future<void> _ensureNotificationPermission() async {
+    if (_askedForNotifications) return;
+    _askedForNotifications = true;
+    if (kIsWeb || !Platform.isAndroid) return;
+    try {
+      await _permissions.invokeMethod<bool>('requestNotifications');
+    } on PlatformException catch (e) {
+      debugPrint('تعذّر طلب إذن الإشعارات: ${e.message}');
+    } on MissingPluginException {
+      // قناة غير متاحة على هذه المنصّة
+    }
+  }
 
   Future<void> initAudioSession() async {
     try {
@@ -161,6 +181,7 @@ class PlayerController extends ChangeNotifier {
     notifyListeners();
 
     try {
+      await _ensureNotificationPermission();
       _transcript = await _repo.loadTranscript(episode.id);
       final uri = await DownloadService.instance.sourceFor(episode);
 

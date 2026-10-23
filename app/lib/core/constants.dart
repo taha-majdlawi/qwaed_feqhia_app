@@ -10,8 +10,14 @@ class AppConstants {
 
   /// مصدر الملفات الصوتية (GitHub Releases).
   /// الرابط الكامل للحلقة = audioBaseUrl + 'ep01.m4a'
-  static const String audioBaseUrl =
-      'https://github.com/taha-majdlawi/qwaed_feqhia_app/releases/download/audio-v1/';
+  ///
+  /// يمكن تبديله وقت البناء للاختبار على خادم محلي:
+  /// flutter run --dart-define=AUDIO_BASE_URL=http://10.0.2.2:8099/
+  static const String audioBaseUrl = String.fromEnvironment(
+    'AUDIO_BASE_URL',
+    defaultValue:
+        'https://github.com/taha-majdlawi/qwaed_feqhia_app/releases/download/audio-v1/',
+  );
 
   static const String repoUrl =
       'https://github.com/taha-majdlawi/qwaed_feqhia_app';

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -30,8 +32,8 @@ class _EpisodesScreenState extends State<EpisodesScreen> {
   }
 
   Future<void> _openEpisode(Episode episode) async {
-    await PlayerController.instance.open(episode);
-    if (!mounted) return;
+    // لا ننتظر تحميل الصوت: الشاشة تفتح فوراً وتعرض حالة التحميل بنفسها.
+    unawaited(PlayerController.instance.open(episode));
     await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const PlayerScreen()),
     );
@@ -101,7 +103,7 @@ class _EpisodesScreenState extends State<EpisodesScreen> {
             padding: const EdgeInsets.fromLTRB(12, 4, 12, 24),
             sliver: SliverList.separated(
               itemCount: episodes.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              separatorBuilder: (_, _) => const SizedBox(height: 10),
               itemBuilder: (context, i) => EpisodeTile(
                 episode: episodes[i],
                 onTap: () => _openEpisode(episodes[i]),
@@ -230,6 +232,8 @@ class _ContinueCard extends StatelessWidget {
     if (episode == null) return const SizedBox.shrink();
 
     final theme = Theme.of(context);
+    final arabicDigits =
+        context.select<SettingsState, bool>((s) => s.arabicDigits);
     final progress = library.progressOf(episode.id);
     final remaining = Duration(
       seconds: ((progress?.duration ?? episode.duration) -
@@ -272,7 +276,7 @@ class _ContinueCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        episode.title,
+                        digits(episode.title, arabic: arabicDigits),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleMedium?.copyWith(
@@ -281,7 +285,7 @@ class _ContinueCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'بقي ${describeDuration(remaining)}',
+                        'بقي ${describeDuration(remaining, arabicDigits: arabicDigits)}',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurface
                               .withValues(alpha: 0.6),

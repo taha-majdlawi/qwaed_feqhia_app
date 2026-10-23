@@ -35,7 +35,12 @@ class DownloadService extends ChangeNotifier {
   final Dio _dio = Dio();
   final Map<String, DownloadInfo> _state = {};
   final Map<String, CancelToken> _tokens = {};
+  final Map<String, DateTime> _lastNotified = {};
   Directory? _dir;
+
+  /// أقل فاصل بين تحديثين لشريط التقدّم. بدونه يُعاد بناء قائمة الحلقات
+  /// مع كل قطعة بيانات، فيتأخّر قارئ المقبس حتى يُغلق الاتصال.
+  static const Duration _progressInterval = Duration(milliseconds: 250);
 
   /// مجلد الصوتيات المحمّلة.
   Future<Directory> _audioDir() async {
@@ -88,6 +93,10 @@ class DownloadService extends ChangeNotifier {
   Uri remoteUri(Episode episode) =>
       Uri.parse('${AppConstants.audioBaseUrl}${episode.audioFileName}');
 
+  /// عدد محاولات التحميل قبل الاستسلام. الملف ~٦ م.ب، والاتصال قد ينقطع،
+  /// فنعيد المحاولة مستأنفين من حيث توقّفنا بدل البدء من الصفر.
+  static const int _maxAttempts = 3;
+
   Future<void> download(Episode episode) async {
     if (infoFor(episode.id).status == DownloadStatus.running) return;
     if (isDownloaded(episode.id)) return;
@@ -96,44 +105,112 @@ class DownloadService extends ChangeNotifier {
     final temp = '$target.part';
     final token = CancelToken();
     _tokens[episode.id] = token;
-    _state[episode.id] = const DownloadInfo(
-      status: DownloadStatus.running,
-    );
+    _state[episode.id] = const DownloadInfo(status: DownloadStatus.running);
     notifyListeners();
 
-    try {
-      await _dio.download(
-        remoteUri(episode).toString(),
-        temp,
-        cancelToken: token,
-        options: Options(followRedirects: true, receiveTimeout: null),
-        onReceiveProgress: (received, total) {
-          _state[episode.id] = DownloadInfo(
-            status: DownloadStatus.running,
-            progress: total > 0 ? received / total : 0,
-            received: received,
-            total: total,
-          );
-          notifyListeners();
-        },
-      );
-      await File(temp).rename(target);
-      _state[episode.id] = const DownloadInfo(status: DownloadStatus.done);
-    } on DioException catch (e) {
-      await _safeDelete(temp);
+    Object? lastError;
+
+    for (var attempt = 1; attempt <= _maxAttempts; attempt++) {
+      try {
+        await _fetchToFile(episode: episode, temp: temp, token: token);
+        await File(temp).rename(target);
+        _state[episode.id] = const DownloadInfo(status: DownloadStatus.done);
+        lastError = null;
+        break;
+      } on DioException catch (e) {
+        if (CancelToken.isCancel(e)) {
+          await _safeDelete(temp);
+          _state[episode.id] = const DownloadInfo(status: DownloadStatus.none);
+          lastError = null;
+          break;
+        }
+        lastError = e;
+        debugPrint(
+            'تعذّر تحميل ${episode.id} (محاولة $attempt): ${e.type} ${e.message}');
+        if (e.response?.statusCode == 404) break;
+      } catch (e) {
+        lastError = e;
+        debugPrint('تعذّر تحميل ${episode.id} (محاولة $attempt): $e');
+      }
+
+      if (attempt < _maxAttempts) {
+        await Future<void>.delayed(Duration(seconds: attempt));
+      }
+    }
+
+    if (lastError != null) {
+      // نُبقي الجزء المحمّل كي تستأنف المحاولة القادمة من موضعه.
       _state[episode.id] = DownloadInfo(
-        status: CancelToken.isCancel(e)
-            ? DownloadStatus.none
-            : DownloadStatus.failed,
-        error: CancelToken.isCancel(e) ? null : _messageFor(e),
+        status: DownloadStatus.failed,
+        error: lastError is DioException
+            ? _messageFor(lastError)
+            : 'فشل التحميل',
       );
-    } catch (e) {
-      await _safeDelete(temp);
-      _state[episode.id] =
-          DownloadInfo(status: DownloadStatus.failed, error: '$e');
+    }
+
+    _tokens.remove(episode.id);
+    _lastNotified.remove(episode.id);
+    notifyListeners();
+  }
+
+  /// ينزّل الملف إلى [temp]، مستأنفاً عبر ترويسة Range إن كان فيه جزء سابق.
+  Future<void> _fetchToFile({
+    required Episode episode,
+    required String temp,
+    required CancelToken token,
+  }) async {
+    final partFile = File(temp);
+    final alreadyHave = await partFile.exists() ? await partFile.length() : 0;
+
+    final response = await _dio.get<ResponseBody>(
+      remoteUri(episode).toString(),
+      cancelToken: token,
+      options: Options(
+        responseType: ResponseType.stream,
+        followRedirects: true,
+        receiveTimeout: const Duration(minutes: 3),
+        headers: alreadyHave > 0 ? {'range': 'bytes=$alreadyHave-'} : null,
+        validateStatus: (code) => code != null && code >= 200 && code < 300,
+      ),
+    );
+
+    // 206 يعني أن الخادم قبل الاستئناف؛ غير ذلك نبدأ من جديد.
+    final resuming = response.statusCode == 206 && alreadyHave > 0;
+    final remaining = int.tryParse(
+          response.headers.value(Headers.contentLengthHeader) ?? '',
+        ) ??
+        0;
+    final total = resuming ? alreadyHave + remaining : remaining;
+
+    final sink = partFile.openWrite(
+      mode: resuming ? FileMode.append : FileMode.write,
+    );
+    var received = resuming ? alreadyHave : 0;
+
+    try {
+      await for (final chunk in response.data!.stream) {
+        sink.add(chunk);
+        received += chunk.length;
+        _state[episode.id] = DownloadInfo(
+          status: DownloadStatus.running,
+          progress: total > 0 ? received / total : 0,
+          received: received,
+          total: total,
+        );
+        final now = DateTime.now();
+        final last = _lastNotified[episode.id];
+        if (last == null || now.difference(last) >= _progressInterval) {
+          _lastNotified[episode.id] = now;
+          notifyListeners();
+        }
+      }
+      await sink.flush();
     } finally {
-      _tokens.remove(episode.id);
-      notifyListeners();
+      await sink.close();
+    }
+
+    if (total > 0 && received < total) {
+      throw const SocketException('انقطع التحميل قبل اكتماله');
     }
   }
 
@@ -143,7 +220,9 @@ class DownloadService extends ChangeNotifier {
 
   Future<void> delete(Episode episode) async {
     cancel(episode.id);
-    await _safeDelete(await localPath(episode));
+    final path = await localPath(episode);
+    await _safeDelete(path);
+    await _safeDelete('$path.part'); // أي جزء ناقص من محاولة سابقة
     _state.remove(episode.id);
     notifyListeners();
   }
