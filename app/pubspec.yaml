@@ -2,7 +2,7 @@ name: qawaid_fiqhiyya
 description: "القواعد الفقهية وتطبيقاتها — الشيخ الدكتور عدنان بن عوض الرشيدي"
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.12.0
@@ -59,7 +59,7 @@ flutter:
           weight: 700
 
 flutter_launcher_icons:
-  android: "launcher_icon"
+  android: true
   ios: true
   remove_alpha_ios: true
   image_path: "assets/images/icon_square.png"

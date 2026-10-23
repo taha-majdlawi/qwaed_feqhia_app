@@ -28,6 +28,10 @@ class AppConstants {
   static String textAsset(String id) => 'assets/data/text/$id.txt';
   static const String splashImage = 'assets/images/splash_bg.jpg';
   static const String iconImage = 'assets/images/app_icon.jpg';
+  static const String iconSquare = 'assets/images/icon_square.png';
+
+  /// غلاف مربّع للإشعار وشاشة القفل.
+  static const String artworkImage = 'assets/images/artwork.jpg';
 
   /// سرعات التشغيل المتاحة.
   static const List<double> speeds = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0];

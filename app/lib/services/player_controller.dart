@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 
@@ -62,6 +63,26 @@ class PlayerController extends ChangeNotifier {
   StreamSubscription<Duration>? _positionSub;
   StreamSubscription<PlayerState>? _stateSub;
   bool _askedForNotifications = false;
+  Uri? _artworkUri;
+
+  /// غلاف السلسلة لإشعار التشغيل ولشاشة القفل.
+  /// الإشعار يحتاج ملفاً على القرص، فننسخ الأصل مرة واحدة.
+  Future<Uri?> _artwork() async {
+    final cached = _artworkUri;
+    if (cached != null) return cached;
+    try {
+      final dir = await getApplicationSupportDirectory();
+      final file = File('${dir.path}${Platform.pathSeparator}artwork.jpg');
+      if (!await file.exists()) {
+        final data = await rootBundle.load(AppConstants.artworkImage);
+        await file.writeAsBytes(data.buffer.asUint8List(), flush: true);
+      }
+      return _artworkUri = Uri.file(file.path);
+    } catch (e) {
+      debugPrint('تعذّر تجهيز صورة الإشعار: $e');
+      return null;
+    }
+  }
 
   static const MethodChannel _permissions =
       MethodChannel('com.qawaid.fiqhiyya/permissions');
@@ -184,6 +205,7 @@ class PlayerController extends ChangeNotifier {
       await _ensureNotificationPermission();
       _transcript = await _repo.loadTranscript(episode.id);
       final uri = await DownloadService.instance.sourceFor(episode);
+      final artwork = await _artwork();
 
       await _player.setAudioSource(
         AudioSource.uri(
@@ -194,6 +216,7 @@ class PlayerController extends ChangeNotifier {
             album: AppConstants.appName,
             artist: AppConstants.author,
             duration: episode.durationObject,
+            artUri: artwork,
           ),
         ),
         initialPosition: startAt ?? _savedPositionFor(episode),
