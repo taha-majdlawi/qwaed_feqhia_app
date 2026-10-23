@@ -44,7 +44,7 @@ app/lib/
 ├── models/      Episode · Paragraph · EpisodeTranscript · Bookmark · PlaybackProgress · SearchHit
 ├── services/    data_repository · storage_service · download_service · player_controller
 ├── state/       library_state · settings_state
-├── screens/     splash · home · episodes · player · search · library · settings
+├── screens/     splash · intro · home · episodes · player · search · library · settings
 └── widgets/     mosque_background · episode_tile · mini_player
 ```
 
@@ -129,16 +129,16 @@ bash tools/verify-audio.sh         # يتأكد أن كل رابط يعمل وب
 > المستخدمون إلى حذف التطبيق وتثبيته من جديد.
 > ولا ترفع `key.properties` ولا ملف `.jks` إلى Git أبداً (كلاهما مستثنى).
 
-### مخرجات الإصدار (v1.0.1)
+### مخرجات الإصدار (v1.0.2)
 
 في `dist/` (مستثنى من Git):
 
 | الملف | الحجم | لمن |
 |---|---|---|
-| `qawaid-fiqhiyya-1.0.1-arm64-v8a.apk` | ٢٩ م.ب | أغلب الهواتف الحديثة |
-| `qawaid-fiqhiyya-1.0.1-armeabi-v7a.apk` | ٢٧ م.ب | هواتف قديمة ٣٢-بت |
-| `QawaidFiqhiyya-v1.0.1.apk` | ٦٥ م.ب | يعمل على الكل (للتوزيع المباشر) |
-| `qawaid-fiqhiyya-1.0.1.aab` | ٦٢ م.ب | لرفعها على Google Play |
+| `qawaid-fiqhiyya-1.0.2-arm64-v8a.apk` | ٢٩ م.ب | أغلب الهواتف الحديثة |
+| `qawaid-fiqhiyya-1.0.2-armeabi-v7a.apk` | ٢٧ م.ب | هواتف قديمة ٣٢-بت |
+| `QawaidFiqhiyya-v1.0.2.apk` | ٦٥ م.ب | يعمل على الكل (للتوزيع المباشر) |
+| `qawaid-fiqhiyya-1.0.2.aab` | ٦٢ م.ب | لرفعها على Google Play |
 
 جُرّبت نسخة الإصدار الموقّعة على المحاكي: تعمل وتبثّ من GitHub وتطلب إذن الإشعارات.
 

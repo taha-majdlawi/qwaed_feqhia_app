@@ -130,38 +130,55 @@ class _Header extends StatelessWidget {
         arabicDigits ? toArabicDigits('$value') : '$value';
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 4),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            AppConstants.appName,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontSize: 30,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-          Text(
-            AppConstants.appSubtitle,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontSize: 20,
-              color: AppColors.gold,
-            ),
-          ),
-          const GoldDivider(width: 150),
-          Text(
-            AppConstants.author,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          Text(
-            AppConstants.authorTitle,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-            textAlign: TextAlign.center,
+          Row(
+            children: [
+              const _SheikhAvatar(),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppConstants.appName,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontSize: 26,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    Text(
+                      AppConstants.appSubtitle,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontSize: 17,
+                        color: AppColors.gold,
+                      ),
+                    ),
+                    const GoldDivider(
+                      width: 120,
+                      margin: EdgeInsets.symmetric(vertical: 7),
+                    ),
+                    Text(
+                      AppConstants.author,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                    ),
+                    Text(
+                      AppConstants.authorTitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontSize: 11,
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 14),
           Row(
@@ -182,6 +199,37 @@ class _Header extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// مصغّر الشيخ في رأس الشاشة الرئيسية، بإطار ذهبي رفيع.
+class _SheikhAvatar extends StatelessWidget {
+  const _SheikhAvatar();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 82,
+      height: 82,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: AppColors.gold, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: ClipOval(
+        child: Image.asset(
+          AppConstants.sheikhImage,
+          fit: BoxFit.cover,
+          filterQuality: FilterQuality.medium,
+        ),
       ),
     );
   }

@@ -27,6 +27,12 @@ class AppConstants {
   static String syncAsset(String id) => 'assets/data/sync/$id.json';
   static String textAsset(String id) => 'assets/data/text/$id.txt';
   static const String splashImage = 'assets/images/splash_bg.jpg';
+
+  /// شاشة البداية والترحيب: صورة الشيخ مع عنوان السلسلة.
+  static const String introImage = 'assets/images/intro.jpg';
+
+  /// مصغّر الشيخ في رأس الشاشة الرئيسية.
+  static const String sheikhImage = 'assets/images/sheikh.jpg';
   static const String iconImage = 'assets/images/app_icon.jpg';
   static const String iconSquare = 'assets/images/icon_square.png';
 
