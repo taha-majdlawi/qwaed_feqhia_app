@@ -1,8 +1,20 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
+
+// أسرار التوقيع تُقرأ من android/key.properties، وهو مستثنى من Git.
+// إن لم يوجد الملف، تُبنى نسخة الإصدار بمفتاح التصحيح (للتجربة المحلية فقط).
+val keystoreProperties = Properties().apply {
+    val file = rootProject.file("key.properties")
+    if (file.exists()) {
+        file.inputStream().use { load(it) }
+    }
+}
+val hasReleaseKey = keystoreProperties.getProperty("storeFile") != null
 
 android {
     namespace = "com.qawaid.qawaid_fiqhiyya"
@@ -15,21 +27,36 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.qawaid.qawaid_fiqhiyya"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (hasReleaseKey) {
+            create("release") {
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (hasReleaseKey) {
+                signingConfigs.getByName("release")
+            } else {
+                logger.warn("key.properties غير موجود — نسخة الإصدار موقّعة بمفتاح التصحيح")
+                signingConfigs.getByName("debug")
+            }
+            // التصغير معطّل عمداً: audio_service و just_audio يعتمدان على
+            // الانعكاس (reflection)، وتفعيل R8 بلا قواعد دقيقة يكسر التشغيل.
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }

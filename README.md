@@ -132,12 +132,19 @@ flutter run --dart-define=AUDIO_BASE_URL=http://10.0.2.2:8100/
 الحقيقي على جهاز المالك في `C:\qawaid-app`، و`app` داخل المستودع وصلة (junction)
 تشير إليه. أي نسخة جديدة في مسار لاتيني لا تحتاج هذا الترتيب.
 
-لبناء نسخة أندرويد:
+## بناء نسخة الإصدار
+
+التوقيع يُقرأ من `app/android/key.properties` (مستثنى من Git). إن لم يوجد،
+تُبنى النسخة بمفتاح التصحيح وتصلح للتجربة فقط لا للتوزيع.
 
 ```bash
 cd app
-flutter build apk --release
+flutter build apk --release --split-per-abi   # ملف لكل معمارية (~٢٨ م.ب)
+flutter build apk --release                   # ملف واحد لكل الأجهزة (~٦٥ م.ب)
+flutter build appbundle --release             # حزمة Google Play (.aab)
 ```
+
+المخرجات في `app/build/app/outputs/`، ونسخة منها في `dist/` (مستثنى من Git).
 
 **المنصّات:** أندرويد و iOS و ويندوز.
 بناء ويندوز يحتاج Visual Studio مع حزمة «Desktop development with C++».
