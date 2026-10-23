@@ -4,6 +4,7 @@ import '../widgets/mini_player.dart';
 import '../widgets/mosque_background.dart';
 import 'episodes_screen.dart';
 import 'library_screen.dart';
+import 'rules_screen.dart';
 import 'search_screen.dart';
 import 'settings_screen.dart';
 
@@ -20,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   static const _pages = [
     EpisodesScreen(),
+    RulesScreen(),
     SearchScreen(),
     LibraryScreen(),
     SettingsScreen(),
@@ -47,6 +49,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icon(Icons.library_books_outlined),
                 selectedIcon: Icon(Icons.library_books_rounded),
                 label: 'الحلقات',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.format_quote_outlined),
+                selectedIcon: Icon(Icons.format_quote_rounded),
+                label: 'القواعد',
               ),
               NavigationDestination(
                 icon: Icon(Icons.search_rounded),

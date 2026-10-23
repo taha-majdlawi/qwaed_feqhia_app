@@ -6,6 +6,7 @@ import '../core/arabic.dart';
 import '../core/constants.dart';
 import '../models/bookmark.dart';
 import '../models/episode.dart';
+import '../models/rule.dart';
 
 /// مصدر بيانات الحلقات: الفهرس والنصوص الموقوتة والبحث فيها.
 ///
@@ -61,9 +62,20 @@ class DataRepository {
     return parsed;
   }
 
-  /// يحمّل نصوص كل الحلقات؛ لازم للبحث الشامل.
-  Future<void> loadAllTranscripts({void Function(int done, int total)? onProgress}) async {
-    if (_allTranscriptsLoaded) return;
+  Future<void>? _loadingAll;
+
+  /// يحمّل نصوص كل الحلقات؛ لازم للبحث الشامل وفهرس القواعد.
+  /// الاستدعاءات المتزامنة تنتظر العملية نفسها بدل تكرارها.
+  Future<void> loadAllTranscripts({
+    void Function(int done, int total)? onProgress,
+  }) {
+    if (_allTranscriptsLoaded) return Future<void>.value();
+    return _loadingAll ??= _loadAllTranscripts(onProgress)
+      ..whenComplete(() => _loadingAll = null);
+  }
+
+  Future<void> _loadAllTranscripts(
+      void Function(int done, int total)? onProgress) async {
     await loadIndex();
     final all = episodes;
     for (var i = 0; i < all.length; i++) {
@@ -139,4 +151,68 @@ class DataRepository {
   /// النص الكامل لحلقة (للمشاركة أو النسخ).
   Future<String> loadPlainText(String episodeId) =>
       rootBundle.loadString(AppConstants.textAsset(episodeId));
+
+  // ===== فهرس القواعد =====
+
+  List<FiqhRule>? _rules;
+
+  /// القواعد والعبارات التي يقتبسها الشيخ بين «» في السلسلة، مرتّبة
+  /// بالأكثر تكراراً. يحتاج أن تكون النصوص محمّلة (`loadAllTranscripts`).
+  ///
+  /// نُطبّع العبارة لتجميع صورها المختلفة (بتشكيل أو بدونه، «الضرر يزال»
+  /// و«الضَّرَرُ يُزَالُ» قاعدة واحدة)، ونعرضها بأشهر صيغة وردت بها.
+  List<FiqhRule> rules() {
+    final cached = _rules;
+    if (cached != null) return cached;
+
+    final byKey = <String, List<RuleOccurrence>>{};
+    final variants = <String, Map<String, int>>{};
+
+    for (final episode in episodes) {
+      final transcript = _transcripts[episode.id];
+      if (transcript == null) continue;
+
+      for (final paragraph in transcript.paragraphs) {
+        for (final match in _quoted.allMatches(paragraph.text)) {
+          final raw = match.group(1)!.trim();
+          final key = normalizeArabic(raw);
+
+          // استبعد المقتبسات القصيرة أو المفردة: ليست قواعد.
+          if (key.length < 10 || key.split(' ').length < 2) continue;
+
+          byKey.putIfAbsent(key, () => []).add(RuleOccurrence(
+                episodeId: episode.id,
+                episodeNumber: episode.number,
+                paragraphIndex: paragraph.index,
+                start: paragraph.start,
+                context: paragraph.text,
+              ));
+          final counts = variants.putIfAbsent(key, () => {});
+          counts[raw] = (counts[raw] ?? 0) + 1;
+        }
+      }
+    }
+
+    final result = <FiqhRule>[];
+    byKey.forEach((key, occurrences) {
+      // اعرض الصيغة الأكثر وروداً، وعند التساوي الأطول (الأكمل تشكيلاً).
+      final counts = variants[key]!;
+      final display = counts.keys.reduce((a, b) {
+        final byCount = counts[b]!.compareTo(counts[a]!);
+        if (byCount != 0) return byCount < 0 ? a : b;
+        return b.length > a.length ? b : a;
+      });
+      result.add(FiqhRule(text: display, occurrences: occurrences));
+    });
+
+    result.sort((a, b) {
+      final byCount = b.count.compareTo(a.count);
+      return byCount != 0 ? byCount : a.text.compareTo(b.text);
+    });
+
+    return _rules = result;
+  }
+
+  /// العبارات بين «» — بما فيها الأقواس المزدوجة التي ترد أحياناً.
+  static final RegExp _quoted = RegExp('[«“]([^»”]{6,120})[»”]');
 }
