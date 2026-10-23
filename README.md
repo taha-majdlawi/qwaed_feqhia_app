@@ -89,10 +89,17 @@
 https://github.com/taha-majdlawi/qwaed_feqhia_app/releases/download/audio-v1/ep01.m4a
 ```
 
-عبر `gh` إن كان مثبّتاً:
+أسهل طريقة — سكربت جاهز في المستودع (آمن للتكرار، ويستأنف ما بقي لو انقطع الرفع):
 
 ```bash
-gh release create audio-v1 audio/*.m4a --title "ملفات الصوت" --notes "صوت الحلقات 1-42"
+gh auth login          # مرة واحدة فقط
+bash tools/upload-audio.sh
+```
+
+وللتأكد لاحقاً أن كل حلقة متاحة بالحجم الصحيح على الرابط الذي يقرأ منه التطبيق:
+
+```bash
+bash tools/verify-audio.sh
 ```
 
 لتغيير مكان الاستضافة لاحقاً، عدّل `audioBaseUrl` في [app/lib/core/constants.dart](app/lib/core/constants.dart) فقط.

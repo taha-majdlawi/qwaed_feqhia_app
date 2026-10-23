@@ -72,8 +72,13 @@ https://github.com/taha-majdlawi/qwaed_feqhia_app/releases/download/audio-v1/ep0
 فالمطلوب: إصدار (release) وسمه **`audio-v1`** بالضبط، ومرفقاته `ep01.m4a` … `ep42.m4a`.
 
 ```bash
-gh release create audio-v1 audio/*.m4a --title "ملفات الصوت" --notes "صوت الحلقات 1-42"
+gh auth login                      # مرة واحدة
+bash tools/upload-audio.sh         # يُنشئ الإصدار ويرفع الـ٤٢ ملفاً
+bash tools/verify-audio.sh         # يتأكد أن كل رابط يعمل وبالحجم الصحيح
 ```
+
+السكربتان في `tools/`. الرفع ملفاً ملفاً مع `--clobber`، فإعادة تشغيله بعد
+انقطاع تكمل ما بقي. GitHub CLI مثبّت على جهاز المالك (نسخة 2.103.0).
 
 قبل الرفع، كل تشغيل من الشبكة سيُظهر «تعذّر الوصول إلى ملف الصوت» — وهذا متوقَّع.
 للاختبار محلياً: شغّل خادماً على مجلد `audio/` وابنِ بـ
