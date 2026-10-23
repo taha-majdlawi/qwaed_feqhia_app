@@ -179,6 +179,8 @@ class DataRepository {
 
           // استبعد المقتبسات القصيرة أو المفردة: ليست قواعد.
           if (key.length < 10 || key.split(' ').length < 2) continue;
+          // واستبعد اسم السلسلة والبرنامج، فالشيخ يكرّرهما بين «» كثيراً.
+          if (_notRules.contains(key)) continue;
 
           byKey.putIfAbsent(key, () => []).add(RuleOccurrence(
                 episodeId: episode.id,
@@ -215,4 +217,11 @@ class DataRepository {
 
   /// العبارات بين «» — بما فيها الأقواس المزدوجة التي ترد أحياناً.
   static final RegExp _quoted = RegExp('[«“]([^»”]{6,120})[»”]');
+
+  /// عبارات ترد بين «» لكنها ليست قواعد (أسماء السلسلة والبرنامج).
+  static final Set<String> _notRules = {
+    normalizeArabic('القواعد الفقهية'),
+    normalizeArabic('القواعد الفقهية وتطبيقاتها'),
+    normalizeArabic('إذاعة القرآن الكريم'),
+  };
 }
