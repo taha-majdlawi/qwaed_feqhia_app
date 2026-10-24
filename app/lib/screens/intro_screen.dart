@@ -34,10 +34,12 @@ class IntroScreen extends StatelessWidget {
         child: Column(
           children: [
             Expanded(
+              // contain لا cover: على الشاشات الأقصر يقصّ cover العنوان
+              // واسم الشيخ. خلفية الصورة كريمية مثل الشاشة فيختفي الفرق.
               child: Image.asset(
                 AppConstants.introImage,
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter,
+                fit: BoxFit.contain,
+                alignment: Alignment.bottomCenter,
                 width: double.infinity,
               ),
             ),

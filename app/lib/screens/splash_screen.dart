@@ -70,8 +70,8 @@ class _SplashScreenState extends State<SplashScreen>
         children: [
           Image.asset(
             AppConstants.introImage,
-            fit: BoxFit.cover,
-            alignment: Alignment.topCenter,
+            fit: BoxFit.contain,
+            alignment: Alignment.center,
           ),
           DecoratedBox(
             decoration: BoxDecoration(
