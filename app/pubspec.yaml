@@ -2,7 +2,7 @@ name: qawaid_fiqhiyya
 description: "القواعد الفقهية وتطبيقاتها — الشيخ الدكتور عدنان بن عوض الرشيدي"
 publish_to: 'none'
 
-version: 1.0.3+4
+version: 1.0.4+5
 
 environment:
   sdk: ^3.12.0

@@ -8,6 +8,10 @@ class AppConstants {
   static const String authorTitle = 'عضو هيئة التدريس بكلية الشريعة — جامعة الكويت';
   static const String source = 'إذاعة القرآن الكريم — دولة الكويت';
 
+  /// نسخة التطبيق المعروضة في الإعدادات.
+  /// تُحدَّث مع `version` في pubspec.yaml.
+  static const String appVersion = '1.0.4';
+
   /// مصدر الملفات الصوتية (GitHub Releases).
   /// الرابط الكامل للحلقة = audioBaseUrl + 'ep01.m4a'
   ///
@@ -21,6 +25,16 @@ class AppConstants {
 
   static const String repoUrl =
       'https://github.com/taha-majdlawi/qwaed_feqhia_app';
+
+  // ===== التواصل مع الشيخ =====
+  /// الرقم بالصيغة الدولية بلا رموز، كما يطلبه wa.me.
+  static const String sheikhPhone = '96551117119';
+
+  /// صيغة العرض؛ نحيطها بعلامات LTR كي لا ينقلبها اتجاه الصفحة.
+  static const String sheikhPhoneDisplay = '\u202A+965 5111 7119\u202C';
+
+  static Uri get sheikhCallUri => Uri.parse('tel:+$sheikhPhone');
+  static Uri get sheikhWhatsAppUri => Uri.parse('https://wa.me/$sheikhPhone');
 
   // مسارات الأصول
   static const String episodesAsset = 'assets/data/episodes.json';

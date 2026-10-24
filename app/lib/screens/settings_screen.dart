@@ -219,14 +219,26 @@ class SettingsScreen extends StatelessWidget {
               subtitle: Text(AppConstants.source),
             ),
             ListTile(
+              leading: const Icon(Icons.phone_outlined),
+              title: const Text('للتواصل مع الشيخ'),
+              subtitle: const Text(AppConstants.sheikhPhoneDisplay),
+              trailing: const Icon(Icons.call_outlined, size: 20),
+              onTap: () => _open(context, AppConstants.sheikhCallUri),
+            ),
+            ListTile(
+              leading: const Icon(Icons.chat_outlined),
+              title: const Text('واتساب'),
+              subtitle: const Text(AppConstants.sheikhPhoneDisplay),
+              trailing: const Icon(Icons.open_in_new_rounded, size: 18),
+              onTap: () => _open(context, AppConstants.sheikhWhatsAppUri),
+            ),
+            ListTile(
               leading: const Icon(Icons.code_rounded),
               title: const Text('مستودع المشروع'),
               subtitle: const Text('GitHub'),
               trailing: const Icon(Icons.open_in_new_rounded, size: 18),
-              onTap: () => launchUrl(
-                Uri.parse(AppConstants.repoUrl),
-                mode: LaunchMode.externalApplication,
-              ),
+              onTap: () =>
+                  _open(context, Uri.parse(AppConstants.repoUrl)),
             ),
           ],
         ),
@@ -241,7 +253,7 @@ class SettingsScreen extends StatelessWidget {
         const SizedBox(height: 10),
         Center(
           child: Text(
-            'نسخة ١٫٠٫٠',
+            'نسخة ${toArabicDigits(AppConstants.appVersion)}',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
             ),
@@ -249,6 +261,24 @@ class SettingsScreen extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// يفتح رابطاً خارجياً، ويخبر المستخدم إن لم يوجد تطبيق يتعامل معه.
+  Future<void> _open(BuildContext context, Uri uri) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final opened =
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!opened) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('لا يوجد تطبيق يفتح هذا الرابط')),
+        );
+      }
+    } catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('تعذّر فتح الرابط')),
+      );
+    }
   }
 
   Future<void> _downloadAll(BuildContext context) async {
