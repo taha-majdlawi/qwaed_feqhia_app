@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -64,8 +66,7 @@ Future<void> _openEpisode(
 }) async {
   final episode = DataRepository.instance.episodeById(episodeId);
   if (episode == null) return;
-  await PlayerController.instance.open(episode, startAt: at);
-  if (!context.mounted) return;
+  unawaited(PlayerController.instance.open(episode, startAt: at));
   await Navigator.of(context).push(
     MaterialPageRoute(builder: (_) => const PlayerScreen()),
   );

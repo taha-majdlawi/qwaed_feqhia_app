@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 
 import '../core/constants.dart';
 import '../core/theme.dart';
+import '../services/storage_service.dart';
 import '../state/library_state.dart';
 import 'home_screen.dart';
+import 'intro_screen.dart';
 
 /// شاشة البداية: غلاف السلسلة كاملاً حتى تنتهي قراءة البيانات.
 class SplashScreen extends StatefulWidget {
@@ -44,7 +46,9 @@ class _SplashScreenState extends State<SplashScreen>
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 500),
-        pageBuilder: (_, _, _) => const HomeScreen(),
+        pageBuilder: (_, _, _) => StorageService.instance.seenIntro
+            ? const HomeScreen()
+            : const IntroScreen(),
         transitionsBuilder: (_, animation, _, child) =>
             FadeTransition(opacity: animation, child: child),
       ),
@@ -60,13 +64,13 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.green,
+      backgroundColor: const Color(0xFFFEFCEF),
       body: Stack(
         fit: StackFit.expand,
         children: [
           Image.asset(
-            AppConstants.splashImage,
-            fit: BoxFit.cover,
+            AppConstants.introImage,
+            fit: BoxFit.contain,
             alignment: Alignment.center,
           ),
           DecoratedBox(
@@ -76,7 +80,7 @@ class _SplashScreenState extends State<SplashScreen>
                 end: Alignment.bottomCenter,
                 colors: [
                   Colors.transparent,
-                  AppColors.green.withValues(alpha: 0.35),
+                  const Color(0xFFFEFCEF).withValues(alpha: 0.85),
                 ],
                 stops: const [0.72, 1],
               ),
@@ -94,7 +98,7 @@ class _SplashScreenState extends State<SplashScreen>
                   child: CircularProgressIndicator(
                     strokeWidth: 2.4,
                     valueColor:
-                        AlwaysStoppedAnimation<Color>(AppColors.goldLight),
+                        AlwaysStoppedAnimation<Color>(AppColors.maroon),
                   ),
                 ),
               ),

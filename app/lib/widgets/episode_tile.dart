@@ -59,7 +59,7 @@ class EpisodeTile extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          episode.title,
+                          digits(episode.title, arabic: useArabicDigits),
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: isCurrent
@@ -78,7 +78,8 @@ class EpisodeTile extends StatelessWidget {
                                     .withValues(alpha: 0.55)),
                             const SizedBox(width: 4),
                             Text(
-                              describeDuration(episode.durationObject),
+                              describeDuration(episode.durationObject,
+                                  arabicDigits: useArabicDigits),
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.onSurface
                                     .withValues(alpha: 0.65),
@@ -91,7 +92,7 @@ class EpisodeTile extends StatelessWidget {
                                     .withValues(alpha: 0.55)),
                             const SizedBox(width: 4),
                             Text(
-                              '${useArabicDigits ? toArabicDigits('${episode.paragraphCount}') : episode.paragraphCount} فقرة',
+                              '${digits('${episode.paragraphCount}', arabic: useArabicDigits)} فقرة',
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.onSurface
                                     .withValues(alpha: 0.65),
@@ -141,7 +142,7 @@ class EpisodeTile extends StatelessWidget {
                     Text(
                       completed
                           ? 'تم الاستماع'
-                          : '${useArabicDigits ? toArabicDigits('${(fraction * 100).round()}') : (fraction * 100).round()}٪',
+                          : '${digits('${(fraction * 100).round()}', arabic: useArabicDigits)}٪',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurface
                             .withValues(alpha: 0.65),

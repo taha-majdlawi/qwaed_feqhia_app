@@ -11,9 +11,7 @@
     <application
         android:label="القواعد الفقهية"
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon">
-        <!-- MainActivity يمتدّ AudioServiceActivity (شرط just_audio_background)
-             ويوفّر قناة طلب إذن الإشعارات وقت التشغيل -->
+        android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -70,6 +68,15 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- لفتح رقم الشيخ في الهاتف، وواتساب/المستودع في المتصفح -->
+        <intent>
+            <action android:name="android.intent.action.DIAL"/>
+            <data android:scheme="tel"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
         </intent>
     </queries>
 </manifest>

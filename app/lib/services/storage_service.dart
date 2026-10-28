@@ -36,6 +36,7 @@ class StorageService {
   static const _kKeepAwake = 'keep_awake';
   static const _kArabicDigits = 'arabic_digits';
   static const _kSearchHistory = 'search_history';
+  static const _kSeenIntro = 'seen_intro';
 
   // ===== المفضلة =====
   Set<String> get favorites =>
@@ -110,6 +111,10 @@ class StorageService {
 
   Future<void> setSearchHistory(List<String> items) =>
       _prefs.setStringList(_kSearchHistory, items);
+
+  // ===== شاشة الترحيب =====
+  bool get seenIntro => _prefs.getBool(_kSeenIntro) ?? false;
+  Future<void> setSeenIntro() => _prefs.setBool(_kSeenIntro, true);
 
   // ===== الإعدادات =====
   int get themeModeIndex => _prefs.getInt(_kThemeMode) ?? 0;

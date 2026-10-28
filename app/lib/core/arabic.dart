@@ -118,14 +118,19 @@ String formatDuration(Duration d, {bool arabicDigits = false}) {
   return arabicDigits ? toArabicDigits(text) : text;
 }
 
+/// يحوّل أرقام النص إلى عربية-هندية عند تفعيل الخيار، وإلا يتركه كما هو.
+/// يُستعمل مع العناوين الآتية من البيانات («الحلقة 1»).
+String digits(String text, {required bool arabic}) =>
+    arabic ? toArabicDigits(text) : text;
+
 /// وصف مختصر للمدة بالعربية، مثل «١٣ دقيقة».
-String describeDuration(Duration d) {
+String describeDuration(Duration d, {bool arabicDigits = true}) {
   final minutes = d.inMinutes;
   if (minutes < 1) return 'أقل من دقيقة';
   if (minutes == 1) return 'دقيقة';
   if (minutes == 2) return 'دقيقتان';
-  if (minutes <= 10) return '${toArabicDigits('$minutes')} دقائق';
-  return '${toArabicDigits('$minutes')} دقيقة';
+  final value = digits('$minutes', arabic: arabicDigits);
+  return minutes <= 10 ? '$value دقائق' : '$value دقيقة';
 }
 
 /// حجم الملف بصيغة مقروءة.

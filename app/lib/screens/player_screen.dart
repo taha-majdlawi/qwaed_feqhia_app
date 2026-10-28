@@ -269,8 +269,23 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(6, 4, 6, 0),
+    final arabicDigits =
+        context.select<SettingsState, bool>((s) => s.arabicDigits);
+    final isDark = theme.brightness == Brightness.dark;
+    final surface =
+        isDark ? AppColors.darkBg : AppColors.cream;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(6, 4, 6, 8),
+      decoration: BoxDecoration(
+        // تدرّج معتم يمنع مرور النص المتحرّك تحت العنوان.
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [surface, surface, surface.withValues(alpha: 0)],
+          stops: const [0, 0.78, 1],
+        ),
+      ),
       child: Row(
         children: [
           IconButton(
@@ -282,7 +297,7 @@ class _TopBar extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  episode.title,
+                  digits(episode.title, arabic: arabicDigits),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,

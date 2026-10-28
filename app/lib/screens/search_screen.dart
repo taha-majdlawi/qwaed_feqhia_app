@@ -83,14 +83,13 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<void> _openHit(SearchHit hit) async {
-    await _rememberQuery(_activeQuery);
     final episode = _repo.episodeById(hit.episodeId);
     if (episode == null) return;
-    await PlayerController.instance.open(
+    unawaited(_rememberQuery(_activeQuery));
+    unawaited(PlayerController.instance.open(
       episode,
       startAt: Duration(milliseconds: (hit.start * 1000).round()),
-    );
-    if (!mounted) return;
+    ));
     await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const PlayerScreen()),
     );

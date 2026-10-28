@@ -37,6 +37,8 @@ Future<void> _initAudioBackend() async {
       await JustAudioBackground.init(
         androidNotificationChannelId: 'com.qawaid.fiqhiyya.audio',
         androidNotificationChannelName: 'تشغيل الحلقات',
+        // قناع أبيض على شفاف — الأيقونة الملوّنة تظهر مربّعاً أبيض.
+        androidNotificationIcon: 'drawable/ic_notification',
         androidNotificationOngoing: true,
         androidStopForegroundOnPause: true,
       );

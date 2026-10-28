@@ -42,3 +42,6 @@ Thumbs.db
 
 # Kotlin build cache
 app/android/.kotlin/
+
+# ملفات التوزيع المبنية
+dist/

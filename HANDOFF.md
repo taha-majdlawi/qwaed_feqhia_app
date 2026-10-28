@@ -1,130 +1,80 @@
-# حالة المشروع — ورقة تسليم لجلسة جديدة
+# حالة المشروع — ورقة تسليم
 
-آخر تحديث: ٢٠٢٦-١٠-٢٢ (جلسة البناء والتشغيل) · المستودع: `taha-majdlawi/qwaed_feqhia_app` · الفرع: `main`
+آخر تحديث: ٢٠٢٦-١٠-٢٣ · المستودع: `taha-majdlawi/qwaed_feqhia_app` · الفرع: `main`
 
 ---
 
 ## ما هو المشروع
 
 تطبيق Flutter للاستماع إلى سلسلة **القواعد الفقهية وتطبيقاتها** للشيخ د. عدنان بن عوض الرشيدي
-(٤٢ حلقة من إذاعة القرآن الكريم — الكويت)، مع **عرض نصّ كل حلقة متزامناً مع الصوت**:
-الفقرة الجارية تُظلَّل تلقائياً، والضغط على أي فقرة ينقل الصوت إلى بدايتها.
+(٤٢ حلقة من إذاعة القرآن الكريم — الكويت)، مع **عرض نصّ كل حلقة متزامناً مع الصوت**.
 
 مشروع Flutter في المجلد **`app/`** داخل المستودع (وليس في الجذر).
 
 ---
 
-## ✅ المنجَز (مرفوع على `main`)
+## ✅ المنجَز والمُختبَر فعلياً على محاكي أندرويد (API 36)
+
+جرى تشغيل التطبيق والتحقق بصرياً من كل ما يلي:
+
+| | الحالة |
+|---|---|
+| شاشة البداية بغلاف السلسلة | ✅ |
+| شاشة الحلقات (٤٢ حلقة، إحصاءات، تصفية وفرز) | ✅ |
+| فتح حلقة والتشغيل | ✅ |
+| **تظليل الفقرة الجارية وتتبّعها مع الصوت** | ✅ |
+| التمرير التلقائي خلف الفقرة | ✅ |
+| البحث الشامل مع تظليل المطابقة رغم التشكيل | ✅ (جرّبنا «الضرر يزال» ← ٣ نتائج في الحلقات ٣ و١١ و٣٢) |
+| تحميل حلقة للاستماع دون إنترنت | ✅ (الملف ينزل بحجم مطابق للمصدر بالبايت) |
+| **التشغيل دون إنترنت من الملف المحمّل** | ✅ (أُغلقت الشبكة تماماً واشتغلت الحلقة) |
+| استئناف الاستماع من آخر موضع | ✅ |
+| إشعار التحكّم بالتشغيل في الخلفية | ✅ |
+| طلب إذن الإشعارات (أندرويد ١٣+) | ✅ |
+| الوضع الفاتح والداكن والأرقام العربية | ✅ |
+| فهرس القواعد (٣٣٠ قاعدة، الضغط عليها ينقل للموضع) | ✅ |
+| التحميل والبثّ من GitHub Releases الحقيقي | ✅ |
+| `flutter analyze` | ✅ بلا أي ملاحظة |
+| `flutter test` | ✅ ٢٨ اختباراً تمرّ |
 
 ### البنية
 ```
 app/lib/
-├── main.dart                     تهيئة الصوت حسب المنصّة + MultiProvider + RTL + locale ar
-├── core/
-│   ├── constants.dart            audioBaseUrl، مسارات الأصول، سرعات التشغيل
-│   ├── arabic.dart               NormalizedText: تطبيع عربي للبحث + خريطة مواضع للتظليل
-│   └── theme.dart                ثيم فاتح/داكن: أخضر #0B3B32 + ذهبي #C9A227 + كريمي #F7F3E8
-├── models/
-│   ├── episode.dart              Episode، EpisodeIndex، Paragraph، EpisodeTranscript (indexAt بحث ثنائي)
-│   └── bookmark.dart             Bookmark، PlaybackProgress، SearchHit
-├── services/
-│   ├── data_repository.dart      تحميل episodes.json والنصوص الموقوتة + بحث شامل
-│   ├── storage_service.dart      SharedPreferences: مفضلة/علامات/تقدّم/إعدادات/سجل بحث
-│   ├── download_service.dart     dio: تحميل .m4a إلى مجلد التطبيق + تقدّم + إلغاء + حذف
-│   └── player_controller.dart    just_audio + تتبّع الفقرة + تكرار + مؤقّت نوم + حفظ تلقائي كل 5ث
-├── state/
-│   ├── library_state.dart        الحلقات، المفضلة، العلامات، التقدّم، التصفية والفرز
-│   └── settings_state.dart       المظهر، حجم الخط، التتبّع التلقائي، الأرقام العربية
-├── screens/
-│   ├── splash_screen.dart        غلاف السلسلة حتى تنتهي قراءة البيانات
-│   ├── home_screen.dart          NavigationBar: الحلقات / البحث / محفوظاتي / الإعدادات + MiniPlayer
-│   ├── episodes_screen.dart      متابعة الاستماع، إحصاءات، بحث بالعنوان، تصفية وفرز
-│   ├── player_screen.dart        ⭐ النص المتتبِّع + لوحة التحكّم الكاملة
-│   ├── search_screen.dart        بحث شامل مع تظليل المطابقة واقتراحات وسجل
-│   ├── library_screen.dart       ثلاثة تبويبات: المفضلة / العلامات / المحمّلة
-│   └── settings_screen.dart      الإعدادات والإحصاءات والتحميلات ومعلومات السلسلة
-└── widgets/
-    ├── mosque_background.dart    خلفية المسجد النبوي الخافتة + GoldDivider
-    ├── episode_tile.dart         بطاقة الحلقة + DownloadButton
-    └── mini_player.dart          شريط مصغّر فوق شريط التنقّل
+├── main.dart                     تهيئة الصوت حسب المنصّة + MultiProvider + RTL
+├── core/        constants (audioBaseUrl قابل للتبديل) · arabic (تطبيع + خريطة مواضع) · theme
+├── models/      Episode · Paragraph · EpisodeTranscript · Bookmark · PlaybackProgress · SearchHit
+├── services/    data_repository · storage_service · download_service · player_controller
+├── state/       library_state · settings_state
+├── screens/     splash · intro · home · episodes · player · search · library · settings
+└── widgets/     mosque_background · episode_tile · mini_player
 ```
 
-### الأصول داخل `app/assets/`
-- `data/episodes.json` + `data/sync/ep01..ep42.json` + `data/text/ep01..ep42.txt`
-- `images/splash_bg.jpg` (غلاف المسجد — سبلاش وخلفية) و `images/app_icon.jpg`
-  و`icon_square.png` (1024×1024) و`icon_foreground.png` (أيقونة تكيّفية)
-- `fonts/` — Amiri (للنص) و Tajawal (للواجهة)
+### تفاصيل تقنية تستحق المعرفة
 
-### الإعدادات الجاهزة
-- أيقونات التطبيق مولَّدة (`flutter_launcher_icons`) لأندرويد و iOS وويندوز
-- سبلاش أصلي مولَّد (`flutter_native_splash`) بخلفية `splash_bg.jpg` ولون `#0B3B32`
-- `AndroidManifest.xml`: أذونات الإنترنت/الإشعارات/الخدمة الأمامية، وخدمة
-  `com.ryanheise.audioservice.AudioService` و`MediaButtonReceiver`،
-  والنشاط `AudioServiceActivity`، والاسم «القواعد الفقهية»
-- `minSdk = 23`، و`android.overridePathCheck=true` في `gradle.properties`
-  (كان لازماً لأن مجلد العمل المحلي اسمه عربي — لا يضرّ في بيئة سحابية)
-
-### حالة الترجمة والبناء
-- `flutter analyze` على **Flutter 3.47.7 / Dart 3.13.5**: `No issues found`.
-- `flutter test`: **٣٤ اختباراً** تمرّ كلها (`test/arabic_test.dart`
-  و`test/episode_test.dart`).
-- `flutter build apk --debug`: **يكتمل** — `app-debug.apk` بحجم ١٦٧ م.ب،
-  وتحقّقنا من الحزمة بـ`aapt2`: النشاط المُشغِّل
-  `com.qawaid.qawaid_fiqhiyya.MainActivity`، والاسم «القواعد الفقهية»،
-  وإذن `POST_NOTIFICATIONS` مُعلَن، وخدمة `AudioService` و`MediaButtonReceiver`
-  في المانيفست المدمج، و٤٢ ملف `sync` و٤٢ ملف `text` والخطوط والصور
-  داخل `flutter_assets`. بلا أي تحذير بناء.
-
-آخر خطأين أُصلحا قبل ذلك: `PlaybackProgress.positionObject` المفقود،
-وتعارض اسم `RepeatMode` مع `RepeatMode` في Flutter
-(أُعيدت التسمية إلى `PlaybackRepeatMode`).
-
-> **للبناء في جلسة سحابية جديدة:** الحاوية تأتي فارغة من Flutter و Android SDK،
-> فنزِّل Flutter stable و`commandlinetools` ثم
-> `sdkmanager --install "platform-tools" "platforms;android-36" "build-tools;36.1.0"`
-> (لا يوجد `platforms;android-37`)، واكتب في `app/android/local.properties`
-> سطرَي `flutter.sdk=` و`sdk.dir=`. ونزّلت Gradle نفسها NDK r28c و CMake 3.22.1
-> تلقائياً.
->
-> و`repo.maven.apache.org` يرُدّ **429 Too Many Requests** على مخرج الشبكة
-> المشترك لهذه الحاويات، فيفشل البناء في حلّ الاعتماديات بلا أي علاقة بالكود.
-> العلاج في `~/.gradle/gradle.properties` (إعداد بيئة، لا يُرفع):
-> ```
-> org.gradle.parallel=false
-> org.gradle.workers.max=2
-> systemProp.org.gradle.internal.repository.max.retries=10
-> systemProp.org.gradle.internal.repository.max.tentatives=10
-> systemProp.org.gradle.internal.repository.initial.backoff=3000
-> ```
-> ولا تُضِف مرآة Maven Central عبر init script: إضافتها إلى مستودعات المشاريع
-> ترفضها AGP 9، وإضافتها إلى `dependencyResolutionManagement` تُهمِل `google()`
-> المعلَنة في `android/build.gradle.kts` فينكسر حلّ AndroidX.
+- **التحميل** (`download_service.dart`) يبثّ الملف ويكتبه إلى `epXX.m4a.part` ثم يعيد تسميته.
+  يعيد المحاولة ٣ مرات، ويستأنف عبر ترويسة `Range` من حيث توقّف (يحتفظ بالجزء عند الفشل).
+  تحديثات شريط التقدّم مهدّأة إلى ٢٥٠ms كي لا تُعاد بناء القائمة مع كل قطعة.
+- **إذن الإشعارات** عبر قناة منصّة صغيرة في
+  `android/app/src/main/kotlin/.../MainActivity.kt` (يرث `AudioServiceActivity`)،
+  بدل حزمة `permission_handler` التي تتطلّب compileSdk 37.
+- **رابط الصوت** يُقرأ من `String.fromEnvironment('AUDIO_BASE_URL')` وافتراضه GitHub Releases.
+- **iOS**: `UIBackgroundModes: audio` مضاف إلى `Info.plist`.
 
 ---
 
-## ⬜ الباقي — رتّبها بهذا الترتيب
+## ✅ الصوتيات مرفوعة والتطبيق يعمل من المصدر الحقيقي
 
-### 1. التشغيل على جهاز والتحقّق البصري (لم يحدث بعد — الأهم)
-بناء الـAPK **صار يكتمل** (انظر «حالة الترجمة والبناء» أعلاه)، لكن التطبيق
-**لم يُشغَّل على أي جهاز بعد** — لا جهاز ولا محاكي في البيئة السحابية.
+رُفعت الـ٤٢ حلقة على إصدار `audio-v1`، و`tools/verify-audio.sh` يؤكّد أن
+الـ٤٢ رابطاً تعمل بأحجام مطابقة. جُرّب في التطبيق: تحميل حلقة من GitHub
+(حجم مطابق بالبايت)، وبثّ حلقة غير محمّلة مع تتبّع النص.
 
-```bash
-cd app
-flutter pub get
-flutter build apk --debug      # يكتمل
-flutter run -d <device>
-```
+> **المستودع عامّ (public)** — وهذا شرط لعمل التطبيق، لا خيار تجميلي:
+> مرفقات الإصدار في المستودعات الخاصة ترجع **404** لأي طلب غير مُصادَق،
+> فلا سبيل لتحميلها من تطبيق بلا تضمين رمز وصول (وهو ثغرة أمنية).
+> إن أُعيد المستودع خاصّاً، سيتوقّف الصوت فوراً في كل الأجهزة.
 
-تحقّق بصرياً من:
-- السبلاش ثم شاشة الحلقات (٤٢ حلقة، أرقام عربية، اتجاه RTL سليم)
-- فتح حلقة → ظهور النص كاملاً، والضغط على فقرة ينقل الصوت
-- التظليل يتحرّك مع الصوت، والتمرير التلقائي يتبعه
-- البحث الشامل: جرّب «الضرر يزال» و«المشقة تجلب التيسير»
-- الوضع الداكن، وتكبير الخط من الإعدادات
+### تفاصيل الاستضافة
 
-### 2. رفع الملفات الصوتية (خطوة يدوية على جهاز المالك)
-الصوتيات (٤٢ ملف، ٢٥٢ م.ب) **ليست في المستودع** (مستثناة في `.gitignore`).
-التطبيق يبني الرابط من `AppConstants.audioBaseUrl`:
+التطبيق يبني الرابط هكذا:
 
 ```
 https://github.com/taha-majdlawi/qwaed_feqhia_app/releases/download/audio-v1/ep01.m4a
@@ -133,50 +83,99 @@ https://github.com/taha-majdlawi/qwaed_feqhia_app/releases/download/audio-v1/ep0
 فالمطلوب: إصدار (release) وسمه **`audio-v1`** بالضبط، ومرفقاته `ep01.m4a` … `ep42.m4a`.
 
 ```bash
-gh release create audio-v1 audio/*.m4a --title "ملفات الصوت" --notes "صوت الحلقات 1-42"
+gh auth login                      # مرة واحدة
+bash tools/upload-audio.sh         # يُنشئ الإصدار ويرفع الـ٤٢ ملفاً
+bash tools/verify-audio.sh         # يتأكد أن كل رابط يعمل وبالحجم الصحيح
 ```
 
-قبل الرفع، كل تشغيل سيُظهر رسالة «تعذّر الوصول إلى ملف الصوت» — وهذا متوقَّع.
-لاختبار التزامن قبل الرفع: ضع أي ملف صوتي باسم `ep01.m4a` على خادم وغيّر `audioBaseUrl` مؤقتاً.
+السكربتان في `tools/`. الرفع ملفاً ملفاً مع `--clobber`، فإعادة تشغيله بعد
+انقطاع تكمل ما بقي. GitHub CLI مثبّت على جهاز المالك (نسخة 2.103.0).
 
-### 3. نواقص تقنية
-#### ✅ أُنجزت
-- **iOS**: أُضيف `UIBackgroundModes: audio` إلى `app/ios/Runner/Info.plist`،
-  وصار `CFBundleDisplayName` = «القواعد الفقهية» بدل "Qawaid Fiqhiyya".
-- **أندرويد ١٣+**: `POST_NOTIFICATIONS` يُطلب الآن وقت التشغيل.
-  `MainActivity` صار يمتدّ `AudioServiceActivity` ويوفّر قناة
-  `com.qawaid.fiqhiyya/permissions`، و`services/notification_permission.dart`
-  يطلب الإذن مرّة واحدة من `PlayerController.open()` — وهو المَعبر الوحيد
-  لكل مواضع بدء التشغيل. بلا حزمة خارجية.
-- **الاختبارات**: `test/arabic_test.dart` و`test/episode_test.dart` — ٣٤ اختباراً.
-- **`flutter analyze`**: يعمل في البيئة السحابية بلا مشاكل (الانهيار على جهاز
-  المالك سببه خلل `perf_witness`: `Cannot delete file … AppData\Local\Dart\perf`).
+لإعادة الرفع أو إضافة حلقات لاحقاً: `bash tools/upload-audio.sh` (آمن للتكرار).
+للاختبار على خادم محلي بدل GitHub: ابنِ بـ
+`--dart-define=AUDIO_BASE_URL=http://10.0.2.2:8100/` (انظر README).
 
-#### ⬜ باقية
-- **ويندوز**: البناء يحتاج Visual Studio بحزمة «Desktop development with C++»
-  (غير مثبّتة على جهاز المالك، ولا تُثبَّت في بيئة لينكس السحابية).
-- **`keepAwake` كود ميّت**: يُحفظ في `storage_service.dart` ويُقرأ في
-  `settings_state.dart`، لكن لا مفتاح له في شاشة الإعدادات ولا أثر له في
-  المشغّل (لا حزمة wakelock في المشروع). فإمّا تُوصَل وإمّا تُحذف.
-- **البحث برقم الحلقة لا يقبل الأرقام العربية**: `LibraryState.visibleEpisodes`
-  يطابق `'${e.number}'.contains(q)` بأرقام لاتينية، والأرقام العربية مفعّلة
-  افتراضياً — فمن يرى «الحلقة ١» ويكتب «١» لا يجد شيئاً.
-- **رابط المستودع في الإعدادات**: `url_launcher` على أندرويد ١١+ يحتاج
-  `<queries><intent><action VIEW/><data android:scheme="https"/></intent></queries>`
-  في المانيفست؛ غير موجود حالياً.
+> ملاحظة من الاختبار: `python -m http.server` العادي (HTTP/1.0) يقطع الاتصال
+> في منتصف التحميل. استخدم خادماً يدعم HTTP/1.1 و keep-alive.
 
-### 4. أفكار للتحسين (اختيارية، بعد ما سبق)
-- تصدير العلامات والمفضلة إلى ملف نصّي للمشاركة
-- فهرس القواعد الفقهية نفسها (استخراج «القاعدة» من كل حلقة وعرضها كقائمة مستقلة)
-- مشاركة مقطع: صورة اقتباس من فقرة
-- إحصاء كلمات: أكثر القواعد تكراراً في السلسلة
+## ⬜ الباقي
+
+### لم يُختبر بعد
+- **iOS**: لم يُبنَ ولم يُشغَّل (لا جهاز Mac).
+- **ويندوز**: البناء يحتاج Visual Studio بحزمة «Desktop development with C++» (غير مثبّتة).
+- استئناف تحميل منقطع فعلياً (الكود جاهز لكن لم تُحاكَ حالة الانقطاع).
+- لا توجد اختبارات آلية (`test/` فارغ).
+
+### أفكار للتحسين
+- تصدير العلامات والمفضلة إلى ملف نصّي
+- مشاركة اقتباس من فقرة كصورة
 
 ---
 
-## اتفاقيات العمل في هذا المشروع
+## 🔑 مفتاح التوقيع — احتفظ به ولا تفقده
 
-- **كومت بعد كل ميزة أو تعديل**، ورسائل الكومت بالعربية بصيغة
-  `feat: …` / `fix: …` / `chore: …` ثم أسطر تفصيلية.
-- واجهة التطبيق ونصوصه كلها بالعربية، والتعليقات في الكود بالعربية أيضاً.
-- الاتجاه RTL في كل الشاشات، والأرقام عربية-هندية عند تفعيل الخيار.
-- لا تُرفع الصوتيات إلى Git أبداً.
+نسخة الإصدار موقّعة بمفتاح خاص بهذا التطبيق:
+
+| | |
+|---|---|
+| الملف | `C:/Users/hp/keystores/qawaid-upload.jks` (خارج المستودع) |
+| الاسم المستعار | `qawaid-upload` |
+| كلمة السرّ | في `app/android/key.properties` (مستثنى من Git) |
+| النوع | RSA 4096، صالح ١٠٠٠٠ يوم |
+| بصمة SHA-256 | `07B8403F0876FF0D888DDEB10A71457D787CA5290A0D6272F44A2820CE3E4896` |
+
+> **احتفظ بنسخة احتياطية من ملف المفتاح وكلمة سرّه في مكان آمن.**
+> إن فقدته لن تستطيع نشر أي تحديث على نفس الهوية في Google Play، وسيضطر
+> المستخدمون إلى حذف التطبيق وتثبيته من جديد.
+> ولا ترفع `key.properties` ولا ملف `.jks` إلى Git أبداً (كلاهما مستثنى).
+
+### مخرجات الإصدار (v1.0.4)
+
+في `dist/` (مستثنى من Git):
+
+| الملف | الحجم | لمن |
+|---|---|---|
+| `qawaid-fiqhiyya-1.0.4-arm64-v8a.apk` | ٢٩ م.ب | أغلب الهواتف الحديثة |
+| `qawaid-fiqhiyya-1.0.4-armeabi-v7a.apk` | ٢٧ م.ب | هواتف قديمة ٣٢-بت |
+| `QawaidFiqhiyya-v1.0.4.apk` | ٦٥ م.ب | يعمل على الكل (للتوزيع المباشر) |
+| `qawaid-fiqhiyya-1.0.4.aab` | ٦٢ م.ب | لرفعها على Google Play |
+
+جُرّبت نسخة الإصدار الموقّعة على المحاكي: تعمل وتبثّ من GitHub وتطلب إذن الإشعارات.
+
+**هوية التطبيق في الإشعار:** أيقونة شريط الحالة مجسّم كتاب أبيض
+(`res/drawable/ic_notification.xml`) — الأيقونة الملوّنة تظهر مربّعاً أبيض —
+وغلاف السلسلة يُكتب إلى ملف عند أول تشغيل ويُمرَّر عبر `MediaItem.artUri`،
+وهو نسخة معتّمة من صورة الغلاف ليقرأ العنوان فوقها.
+وكان `flutter_launcher_icons` يكتب الأيقونة باسم `launcher_icon` ويترك
+`ic_launcher` بشعار Flutter الافتراضي، فصار يكتب فوق `ic_launcher` مباشرة.
+
+---
+
+## قيد مهم على بيئة ويندوز
+
+أدوات CMake/NDK تفشل إذا كان مسار المشروع يحتوي حروفاً عربية: ninja يكتب
+`libdartjni.so` إلى مسار مشوَّه (`C:\Users\hp\Desktop\??????? ???????\...`)
+فلا يجده Gradle. لذلك:
+
+- مجلد `app/` الحقيقي على جهاز المالك في **`C:\qawaid-app`**
+- و`app` داخل مجلد المستودع العربي **وصلة (junction)** تشير إليه
+- Git يتعامل معها كمجلد عادي ويتتبّع الملفات بلا مشاكل
+- أوامر `flutter` تُشغَّل من `C:\qawaid-app`
+
+أي نسخة جديدة في مسار لاتيني (أو بيئة لينكس/سحابية) لا تحتاج هذا الترتيب إطلاقاً.
+
+---
+
+## مواد Google Play
+
+كل ما تطلبه بطاقة المتجر جاهز في `store/` (انظر `store/README.md`):
+النصوص بأطوالها، ورمز ٥١٢×٥١٢، ورسم مميز ١٠٢٤×٥٠٠، وسبع لقطات ١٠٨٠×١٩٢٠،
+وسياسة خصوصية بالعربية والإنجليزية (Play لا ينشر بدون رابط علني لها).
+
+---
+
+## اتفاقيات العمل
+
+- **كومت بعد كل ميزة أو إصلاح**، برسائل عربية بصيغة `feat:` / `fix:` / `chore:` / `docs:`
+- واجهة التطبيق ونصوصه وتعليقات الكود كلها بالعربية، والاتجاه RTL
+- لا تُرفع الصوتيات إلى Git أبداً

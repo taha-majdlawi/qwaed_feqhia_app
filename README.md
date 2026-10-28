@@ -89,10 +89,17 @@
 https://github.com/taha-majdlawi/qwaed_feqhia_app/releases/download/audio-v1/ep01.m4a
 ```
 
-عبر `gh` إن كان مثبّتاً:
+أسهل طريقة — سكربت جاهز في المستودع (آمن للتكرار، ويستأنف ما بقي لو انقطع الرفع):
 
 ```bash
-gh release create audio-v1 audio/*.m4a --title "ملفات الصوت" --notes "صوت الحلقات 1-42"
+gh auth login          # مرة واحدة فقط
+bash tools/upload-audio.sh
+```
+
+وللتأكد لاحقاً أن كل حلقة متاحة بالحجم الصحيح على الرابط الذي يقرأ منه التطبيق:
+
+```bash
+bash tools/verify-audio.sh
 ```
 
 لتغيير مكان الاستضافة لاحقاً، عدّل `audioBaseUrl` في [app/lib/core/constants.dart](app/lib/core/constants.dart) فقط.
@@ -107,12 +114,37 @@ flutter pub get
 flutter run
 ```
 
-لبناء نسخة أندرويد:
+### اختبار الصوت قبل رفعه على Releases
+
+رابط الصوت قابل للتبديل وقت البناء، فيمكن تجربته من خادم محلي:
+
+```bash
+flutter run --dart-define=AUDIO_BASE_URL=http://10.0.2.2:8100/
+```
+
+(`10.0.2.2` هو عنوان جهازك من داخل محاكي أندرويد. نسخة التصحيح تسمح بـ HTTP
+عبر `android/app/src/debug/AndroidManifest.xml`، أما نسخة الإصدار فلا تسمح إلا بـ HTTPS.)
+
+### تنبيه: مسار المشروع يجب أن يكون لاتينياً
+
+أدوات CMake/NDK على ويندوز تفشل إن كان مسار المشروع يحتوي حروفاً عربية
+(`libdartjni.so` يُبنى على مسار مشوَّه فلا يجده Gradle). لذلك مجلد `app/`
+الحقيقي على جهاز المالك في `C:\qawaid-app`، و`app` داخل المستودع وصلة (junction)
+تشير إليه. أي نسخة جديدة في مسار لاتيني لا تحتاج هذا الترتيب.
+
+## بناء نسخة الإصدار
+
+التوقيع يُقرأ من `app/android/key.properties` (مستثنى من Git). إن لم يوجد،
+تُبنى النسخة بمفتاح التصحيح وتصلح للتجربة فقط لا للتوزيع.
 
 ```bash
 cd app
-flutter build apk --release
+flutter build apk --release --split-per-abi   # ملف لكل معمارية (~٢٨ م.ب)
+flutter build apk --release                   # ملف واحد لكل الأجهزة (~٦٥ م.ب)
+flutter build appbundle --release             # حزمة Google Play (.aab)
 ```
+
+المخرجات في `app/build/app/outputs/`، ونسخة منها في `dist/` (مستثنى من Git).
 
 **المنصّات:** أندرويد و iOS و ويندوز.
 بناء ويندوز يحتاج Visual Studio مع حزمة «Desktop development with C++».
