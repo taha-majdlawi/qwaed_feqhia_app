@@ -1,11 +1,40 @@
 # حالة المشروع — ورقة تسليم
 
-آخر تحديث: ٢٠٢٦-١٠-٢٣ · المستودع: `taha-majdlawi/qwaed_feqhia_app` · الفرع: `main`
+آخر تحديث: ٢٠٢٦-١٠-٢٨ (جلسة التشغيل على جهاز حقيقي) · المستودع: `taha-majdlawi/qwaed_feqhia_app`
+· الفرع: `claude/adoring-einstein-yc6v9h` (دُمج فيه `main` كاملاً)
+
+---
+
+## ✅ شُغِّل على جهاز حقيقي (٢٠٢٦-١٠-٢٨)
+
+Redmi 24115RA8EG · HyperOS (MIUI V816) · أندرويد ١٦ · `flutter run -d 7c4ed2e3`
+من نسخة في مسار لاتيني `C:\Users\hp\qawaid` بـ Flutter 3.44.0 / Dart 3.12.0.
+
+تحقّق بصري بلقطات `adb exec-out screencap`، وكلّه سليم:
+شاشة الترحيب بصورة الشيخ، ثم ٤٢ حلقة باتجاه RTL، وفتح الحلقة يعرض النصّ كاملاً،
+والتظليل يتحرّك مع الصوت والتمرير يتبعه، والضغط على فقرة ينقل الصوت إلى بدايتها،
+والبحث «الضرر يزال» (٣ نتائج) و«الأمور بمقاصدها» (٢٩ نتيجة) مع تظليل المطابقة،
+وفهرس القواعد (٣٣٠ قاعدة) وفتح مواضع ورود القاعدة، والوضع الفاتح والداكن،
+وحجم الخط حتى ١٫٧٠×، والأرقام العربية ٠١٢٣ تشمل عناوين الحلقات.
+والصوت **يُبَثّ فعلاً** من إصدار `audio-v1` بلا تحميل مسبق.
+
+### فخّ: شاومي ترفض التثبيت عبر adb
+
+`INSTALL_FAILED_USER_RESTRICTED: Install canceled by user` على HyperOS/MIUI
+ليس خطأ في الكود ولا في Flutter: التثبيت من adb ممنوع ما لم يُفعَّل
+**«تثبيت عبر USB»** في خيارات المطور. و`adb push` + `pm install` من شلّ
+الجهاز يُرَدّ بالرفض نفسه. وقبله قد يظهر
+`INSTALL_FAILED_UPDATE_INCOMPATIBLE` إن كانت على الجهاز نسخة بمفتاح مختلف،
+وعندها يُزيلها `flutter` تلقائياً — فتُمحى المفضلة والعلامات والتقدّم.
+
+### `android.overridePathCheck` حُذف
+
+كان في `app/android/gradle.properties` حيلةً لمسار العمل العربي. على مسار
+لاتيني لا داعي له، و`flutter build apk --debug` يكتمل بدونه.
 
 ---
 
 ## ما هو المشروع
-
 تطبيق Flutter للاستماع إلى سلسلة **القواعد الفقهية وتطبيقاتها** للشيخ د. عدنان بن عوض الرشيدي
 (٤٢ حلقة من إذاعة القرآن الكريم — الكويت)، مع **عرض نصّ كل حلقة متزامناً مع الصوت**.
 
@@ -37,7 +66,7 @@
 | `flutter test` | ✅ ٢٨ اختباراً تمرّ |
 
 ### البنية
-```
+``
 app/lib/
 ├── main.dart                     تهيئة الصوت حسب المنصّة + MultiProvider + RTL
 ├── core/        constants (audioBaseUrl قابل للتبديل) · arabic (تطبيع + خريطة مواضع) · theme
@@ -46,7 +75,7 @@ app/lib/
 ├── state/       library_state · settings_state
 ├── screens/     splash · intro · home · episodes · player · search · library · settings
 └── widgets/     mosque_background · episode_tile · mini_player
-```
+``
 
 ### تفاصيل تقنية تستحق المعرفة
 
@@ -76,17 +105,17 @@ app/lib/
 
 التطبيق يبني الرابط هكذا:
 
-```
+``
 https://github.com/taha-majdlawi/qwaed_feqhia_app/releases/download/audio-v1/ep01.m4a
-```
+``
 
 فالمطلوب: إصدار (release) وسمه **`audio-v1`** بالضبط، ومرفقاته `ep01.m4a` … `ep42.m4a`.
 
-```bash
+``bash
 gh auth login                      # مرة واحدة
 bash tools/upload-audio.sh         # يُنشئ الإصدار ويرفع الـ٤٢ ملفاً
 bash tools/verify-audio.sh         # يتأكد أن كل رابط يعمل وبالحجم الصحيح
-```
+``
 
 السكربتان في `tools/`. الرفع ملفاً ملفاً مع `--clobber`، فإعادة تشغيله بعد
 انقطاع تكمل ما بقي. GitHub CLI مثبّت على جهاز المالك (نسخة 2.103.0).
@@ -104,7 +133,8 @@ bash tools/verify-audio.sh         # يتأكد أن كل رابط يعمل وب
 - **iOS**: لم يُبنَ ولم يُشغَّل (لا جهاز Mac).
 - **ويندوز**: البناء يحتاج Visual Studio بحزمة «Desktop development with C++» (غير مثبّتة).
 - استئناف تحميل منقطع فعلياً (الكود جاهز لكن لم تُحاكَ حالة الانقطاع).
-- لا توجد اختبارات آلية (`test/` فارغ).
+- ~~لا توجد اختبارات آلية~~ — صار فيها ٤٦ اختباراً تمرّ كلها
+  (`arabic_test.dart` و`episode_test.dart` و`transcript_test.dart`).
 
 ### أفكار للتحسين
 - تصدير العلامات والمفضلة إلى ملف نصّي
