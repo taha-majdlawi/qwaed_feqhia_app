@@ -12,6 +12,7 @@ import '../models/episode.dart';
 import '../services/data_repository.dart';
 import '../services/download_service.dart';
 import '../services/player_controller.dart';
+import '../services/screen_awake.dart';
 import '../state/library_state.dart';
 import '../state/settings_state.dart';
 import '../widgets/episode_tile.dart';
@@ -46,6 +47,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   @override
   void dispose() {
+    ScreenAwake.set(false);
     _player.currentParagraph.removeListener(_onParagraphChanged);
     _userScrollTimer?.cancel();
     _scrollController.dispose();
@@ -185,6 +187,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
     final library = context.watch<LibraryState>();
     final isFavorite = library.isFavorite(episode.id);
+
+    // الشاشة تبقى مضاءة ما دام الصوت يعمل هنا، إن فعّل المستخدم الخيار.
+    final keepAwake = context.select<SettingsState, bool>((s) => s.keepAwake);
+    ScreenAwake.set(keepAwake && player.isPlaying);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -826,6 +832,8 @@ class _SleepTimerSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const options = [5, 10, 15, 30, 45, 60];
+    final arabicDigits =
+        context.select<SettingsState, bool>((s) => s.arabicDigits);
     return SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -842,7 +850,9 @@ class _SleepTimerSheet extends StatelessWidget {
             children: [
               for (final minutes in options)
                 ActionChip(
-                  label: Text('${toArabicDigits('$minutes')} دقيقة'),
+                  label: Text(
+                    '${digits('$minutes', arabic: arabicDigits)} دقيقة',
+                  ),
                   onPressed: () {
                     player.startSleepTimer(Duration(minutes: minutes));
                     Navigator.pop(context);
@@ -909,6 +919,8 @@ class _InEpisodeSearchSheetState extends State<_InEpisodeSearchSheet> {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final arabicDigits =
+        context.select<SettingsState, bool>((s) => s.arabicDigits);
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),
       child: DraggableScrollableSheet(
@@ -932,7 +944,7 @@ class _InEpisodeSearchSheetState extends State<_InEpisodeSearchSheet> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Text(
-                  '${toArabicDigits('${_results.length}')} نتيجة',
+                  '${digits('${_results.length}', arabic: arabicDigits)} نتيجة',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),

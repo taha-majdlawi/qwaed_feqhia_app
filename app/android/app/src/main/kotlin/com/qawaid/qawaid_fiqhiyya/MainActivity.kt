@@ -3,6 +3,7 @@ package com.qawaid.qawaid_fiqhiyya
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
+import android.view.WindowManager
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -27,9 +28,28 @@ class MainActivity : AudioServiceActivity() {
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "requestNotificationPermission" -> requestNotificationPermission(result)
+                    "setKeepAwake" -> {
+                        setKeepAwake(call.argument<Boolean>("on") ?: false)
+                        result.success(true)
+                    }
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    /**
+     * إبقاء الشاشة مضاءة ما دام الصوت يعمل في شاشة الاستماع.
+     * FLAG_KEEP_SCREEN_ON علمٌ على النافذة، يرفعه النظام وحده عند الخروج،
+     * فلا حاجة إلى حزمة wakelock ولا إلى إذن.
+     */
+    private fun setKeepAwake(on: Boolean) {
+        runOnUiThread {
+            if (on) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            } else {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+        }
     }
 
     /** يُرجع true إن كان الإذن ممنوحاً (أو غير مطلوب في هذه النسخة). */

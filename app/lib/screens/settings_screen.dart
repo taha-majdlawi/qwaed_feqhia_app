@@ -75,7 +75,7 @@ class SettingsScreen extends StatelessWidget {
                       const Text('حجم خط النص'),
                       const Spacer(),
                       Text(
-                        '×${toArabicDigits(settings.fontScale.toStringAsFixed(2))}',
+                        '×${digits(settings.fontScale.toStringAsFixed(2), arabic: settings.arabicDigits)}',
                         style: theme.textTheme.bodySmall,
                       ),
                     ],
@@ -126,11 +126,20 @@ class SettingsScreen extends StatelessWidget {
               value: settings.autoScroll,
               onChanged: settings.setAutoScroll,
             ),
+            SwitchListTile(
+              secondary: const Icon(Icons.brightness_high_rounded),
+              title: const Text('إبقاء الشاشة مضاءة'),
+              subtitle: const Text(
+                'لا تنطفئ الشاشة ما دام الصوت يعمل في شاشة الاستماع',
+              ),
+              value: settings.keepAwake,
+              onChanged: settings.setKeepAwake,
+            ),
             ListTile(
               leading: const Icon(Icons.speed_rounded),
               title: const Text('سرعة التشغيل الافتراضية'),
               subtitle: Text(
-                '×${toArabicDigits(StorageService.instance.playbackSpeed.toString())}',
+                '×${digits(StorageService.instance.playbackSpeed.toString(), arabic: settings.arabicDigits)}',
               ),
               trailing: PopupMenuButton<double>(
                 icon: const Icon(Icons.expand_more_rounded),
@@ -139,7 +148,9 @@ class SettingsScreen extends StatelessWidget {
                   for (final speed in AppConstants.speeds)
                     PopupMenuItem(
                       value: speed,
-                      child: Text('×${toArabicDigits('$speed')}'),
+                      child: Text(
+                        '×${digits('$speed', arabic: settings.arabicDigits)}',
+                      ),
                     ),
                 ],
               ),
@@ -156,9 +167,9 @@ class SettingsScreen extends StatelessWidget {
               subtitle: FutureBuilder<int>(
                 future: downloads.usedBytes(),
                 builder: (context, snapshot) => Text(
-                  '${toArabicDigits('${downloads.downloadedCount}')} من '
-                  '${toArabicDigits('${library.allEpisodes.length}')} حلقة • '
-                  '${formatBytes(snapshot.data ?? 0)}',
+                  '${digits('${downloads.downloadedCount}', arabic: settings.arabicDigits)} من '
+                  '${digits('${library.allEpisodes.length}', arabic: settings.arabicDigits)} حلقة • '
+                  '${formatBytes(snapshot.data ?? 0, arabicDigits: settings.arabicDigits)}',
                 ),
               ),
             ),
@@ -190,16 +201,16 @@ class SettingsScreen extends StatelessWidget {
               leading: const Icon(Icons.task_alt_rounded),
               title: const Text('الحلقات المكتملة'),
               subtitle: Text(
-                '${toArabicDigits('${library.completedCount}')} من '
-                '${toArabicDigits('${library.allEpisodes.length}')}',
+                '${digits('${library.completedCount}', arabic: settings.arabicDigits)} من '
+                '${digits('${library.allEpisodes.length}', arabic: settings.arabicDigits)}',
               ),
             ),
             ListTile(
               leading: const Icon(Icons.bookmarks_outlined),
               title: const Text('المفضلة والعلامات'),
               subtitle: Text(
-                '${toArabicDigits('${library.favorites.length}')} مفضلة • '
-                '${toArabicDigits('${library.bookmarks.length}')} علامة',
+                '${digits('${library.favorites.length}', arabic: settings.arabicDigits)} مفضلة • '
+                '${digits('${library.bookmarks.length}', arabic: settings.arabicDigits)} علامة',
               ),
             ),
           ],
@@ -253,7 +264,7 @@ class SettingsScreen extends StatelessWidget {
         const SizedBox(height: 10),
         Center(
           child: Text(
-            'نسخة ${toArabicDigits(AppConstants.appVersion)}',
+            'نسخة ${digits(AppConstants.appVersion, arabic: settings.arabicDigits)}',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
             ),
@@ -284,6 +295,7 @@ class SettingsScreen extends StatelessWidget {
   Future<void> _downloadAll(BuildContext context) async {
     final library = context.read<LibraryState>();
     final downloads = context.read<DownloadService>();
+    final arabicDigits = context.read<SettingsState>().arabicDigits;
     final pending = library.allEpisodes
         .where((e) => !downloads.isDownloaded(e.id))
         .toList();
@@ -300,8 +312,8 @@ class SettingsScreen extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Text('تحميل كل الحلقات؟'),
         content: Text(
-          'سيجري تحميل ${toArabicDigits('${pending.length}')} حلقة '
-          '(نحو ${toArabicDigits('${(pending.length * 6).round()}')} ميجابايت). '
+          'سيجري تحميل ${digits('${pending.length}', arabic: arabicDigits)} حلقة '
+          '(نحو ${digits('${(pending.length * 6).round()}', arabic: arabicDigits)} ميجابايت). '
           'يمكنك إيقاف أي حلقة من زرّها.',
         ),
         actions: [
@@ -326,6 +338,7 @@ class SettingsScreen extends StatelessWidget {
   Future<void> _deleteAll(BuildContext context) async {
     final library = context.read<LibraryState>();
     final downloads = context.read<DownloadService>();
+    final arabicDigits = context.read<SettingsState>().arabicDigits;
 
     final ok = await showDialog<bool>(
       context: context,
