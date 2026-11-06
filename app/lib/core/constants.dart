@@ -10,7 +10,7 @@ class AppConstants {
 
   /// نسخة التطبيق المعروضة في الإعدادات.
   /// تُحدَّث مع `version` في pubspec.yaml.
-  static const String appVersion = '1.0.4';
+  static const String appVersion = '1.0.5';
 
   /// مصدر الملفات الصوتية (GitHub Releases).
   /// الرابط الكامل للحلقة = audioBaseUrl + 'ep01.m4a'
