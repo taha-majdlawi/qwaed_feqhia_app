@@ -167,6 +167,9 @@ class DataRepository {
 
     final byKey = <String, List<RuleOccurrence>>{};
     final variants = <String, Map<String, int>>{};
+    // قد يكرّر الشيخ القاعدة نفسها مرّتين في فقرة واحدة؛ نعدّ الفقرة مرّة
+    // واحدة كي لا يظهر الموضع نفسه مكرّراً بنفس النص في الفهرس.
+    final seen = <String>{};
 
     for (final episode in episodes) {
       final transcript = _transcripts[episode.id];
@@ -182,6 +185,10 @@ class DataRepository {
           // واستبعد اسم السلسلة والبرنامج، فالشيخ يكرّرهما بين «» كثيراً.
           if (_notRules.contains(key)) continue;
 
+          final counts = variants.putIfAbsent(key, () => {});
+          counts[raw] = (counts[raw] ?? 0) + 1;
+
+          if (!seen.add('$key|${episode.id}|${paragraph.index}')) continue;
           byKey.putIfAbsent(key, () => []).add(RuleOccurrence(
                 episodeId: episode.id,
                 episodeNumber: episode.number,
@@ -189,8 +196,6 @@ class DataRepository {
                 start: paragraph.start,
                 context: paragraph.text,
               ));
-          final counts = variants.putIfAbsent(key, () => {});
-          counts[raw] = (counts[raw] ?? 0) + 1;
         }
       }
     }
