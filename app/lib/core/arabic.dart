@@ -107,6 +107,22 @@ String toArabicDigits(String input) {
   return buffer.toString();
 }
 
+/// يحوّل الأرقام العربية-الهندية (٠١٢٣) والفارسية (۰۱۲۳) إلى لاتينية،
+/// كي يجد البحث «١٢» كما يجد «12».
+String toWesternDigits(String input) {
+  final buffer = StringBuffer();
+  for (final rune in input.runes) {
+    if (rune >= 0x0660 && rune <= 0x0669) {
+      buffer.writeCharCode(0x30 + rune - 0x0660);
+    } else if (rune >= 0x06F0 && rune <= 0x06F9) {
+      buffer.writeCharCode(0x30 + rune - 0x06F0);
+    } else {
+      buffer.writeCharCode(rune);
+    }
+  }
+  return buffer.toString();
+}
+
 /// تنسيق المدة بصيغة m:ss أو h:mm:ss.
 String formatDuration(Duration d, {bool arabicDigits = false}) {
   final hours = d.inHours;
@@ -134,10 +150,12 @@ String describeDuration(Duration d, {bool arabicDigits = true}) {
 }
 
 /// حجم الملف بصيغة مقروءة.
-String formatBytes(int bytes) {
-  if (bytes < 1024) return '$bytes بايت';
+String formatBytes(int bytes, {bool arabicDigits = true}) {
+  if (bytes < 1024) return '${digits('$bytes', arabic: arabicDigits)} بايت';
   if (bytes < 1024 * 1024) {
-    return '${toArabicDigits((bytes / 1024).toStringAsFixed(0))} ك.ب';
+    final kb = (bytes / 1024).toStringAsFixed(0);
+    return '${digits(kb, arabic: arabicDigits)} ك.ب';
   }
-  return '${toArabicDigits((bytes / (1024 * 1024)).toStringAsFixed(1))} م.ب';
+  final mb = (bytes / (1024 * 1024)).toStringAsFixed(1);
+  return '${digits(mb, arabic: arabicDigits)} م.ب';
 }

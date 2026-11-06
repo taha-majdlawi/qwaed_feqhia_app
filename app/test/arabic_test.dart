@@ -130,11 +130,25 @@ void main() {
     });
   });
 
+  group('toWesternDigits', () {
+    test('يحوّل العربية-الهندية والفارسية ويترك الباقي', () {
+      expect(toWesternDigits('الحلقة ١٢'), 'الحلقة 12');
+      expect(toWesternDigits('۰۹'), '09');
+      expect(toWesternDigits('abc 7'), 'abc 7');
+    });
+  });
+
   group('formatBytes', () {
-    test('بايت وكيلوبايت وميجابايت', () {
-      expect(formatBytes(512), '512 بايت');
+    test('بايت وكيلوبايت وميجابايت بأرقام عربية', () {
+      expect(formatBytes(512), '٥١٢ بايت');
       expect(formatBytes(2048), '٢ ك.ب');
       expect(formatBytes(6 * 1024 * 1024), '٦.٠ م.ب');
+    });
+
+    test('الأرقام لاتينية حين يُطفئ المستخدم الأرقام العربية', () {
+      expect(formatBytes(512, arabicDigits: false), '512 بايت');
+      expect(formatBytes(2048, arabicDigits: false), '2 ك.ب');
+      expect(formatBytes(6 * 1024 * 1024, arabicDigits: false), '6.0 م.ب');
     });
   });
 }

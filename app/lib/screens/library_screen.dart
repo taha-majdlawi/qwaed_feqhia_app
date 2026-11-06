@@ -224,6 +224,8 @@ class _DownloadsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final library = context.watch<LibraryState>();
     final downloads = context.watch<DownloadService>();
+    final arabicDigits =
+        context.select<SettingsState, bool>((s) => s.arabicDigits);
     final episodes = library.allEpisodes
         .where((e) => downloads.isDownloaded(e.id))
         .toList();
@@ -247,8 +249,8 @@ class _DownloadsTab extends StatelessWidget {
                 const Icon(Icons.sd_storage_outlined, size: 18),
                 const SizedBox(width: 8),
                 Text(
-                  '${toArabicDigits('${episodes.length}')} حلقة • '
-                  '${formatBytes(snapshot.data ?? 0)}',
+                  '${digits('${episodes.length}', arabic: arabicDigits)} حلقة • '
+                  '${formatBytes(snapshot.data ?? 0, arabicDigits: arabicDigits)}',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
