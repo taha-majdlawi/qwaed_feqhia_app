@@ -36,6 +36,21 @@ class DataRepository {
     return null;
   }
 
+  /// الحلقة التالية في ترتيب السلسلة — لا بالرقم، فترقيم الحلقات فيه
+  /// فجوات (لا توجد حلقات ١٣–٣٠ ولا ٦٥–٦٦)، والاعتماد على الرقم يوقف
+  /// التنقّل عند أول فجوة.
+  Episode? episodeAfter(Episode episode) {
+    final list = episodes;
+    final i = list.indexWhere((e) => e.id == episode.id);
+    return (i >= 0 && i + 1 < list.length) ? list[i + 1] : null;
+  }
+
+  Episode? episodeBefore(Episode episode) {
+    final list = episodes;
+    final i = list.indexWhere((e) => e.id == episode.id);
+    return i > 0 ? list[i - 1] : null;
+  }
+
   /// يحمّل فهرس الحلقات مرة واحدة.
   Future<EpisodeIndex> loadIndex() async {
     final cached = _index;

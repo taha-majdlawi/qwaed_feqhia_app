@@ -323,7 +323,7 @@ class PlayerController extends ChangeNotifier {
   Future<void> playNext() async {
     final current = _episode;
     if (current == null) return;
-    final next = _repo.episodeByNumber(current.number + 1);
+    final next = _repo.episodeAfter(current);
     if (next == null) {
       await _player.pause();
       await _player.seek(Duration.zero);
@@ -341,19 +341,19 @@ class PlayerController extends ChangeNotifier {
       await seek(Duration.zero);
       return;
     }
-    final previous = _repo.episodeByNumber(current.number - 1);
+    final previous = _repo.episodeBefore(current);
     if (previous == null) return;
     await open(previous, startAt: Duration.zero);
   }
 
   bool get hasNext {
     final current = _episode;
-    return current != null && _repo.episodeByNumber(current.number + 1) != null;
+    return current != null && _repo.episodeAfter(current) != null;
   }
 
   bool get hasPrevious {
     final current = _episode;
-    return current != null && _repo.episodeByNumber(current.number - 1) != null;
+    return current != null && _repo.episodeBefore(current) != null;
   }
 
   // ===== مؤقّت النوم =====
