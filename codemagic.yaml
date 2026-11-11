@@ -1,0 +1,148 @@
+# بناء ونشر تطبيق «القواعد الفقهية وتطبيقاتها» عبر Codemagic.
+#
+# مشروع Flutter في مجلد app/ لا في جذر المستودع، لذلك كل سكربت
+# يبدأ بالدخول إلى $CM_BUILD_DIR/app.
+#
+# قبل أول تشغيل، اضبط في Codemagic (انظر store/CODEMAGIC.md):
+#   • تكامل App Store Connect باسم  qawaid_asc
+#   • متغيّر APP_STORE_APPLE_ID في مجموعة  appstore
+#   • (لأندرويد) ملف المفتاح والكلمات في مجموعة  google_play
+
+definitions:
+  flutter_dir: &flutter_dir
+    working_directory: app
+
+workflows:
+  # ───────────────────────── iOS ─────────────────────────
+  ios-testflight:
+    name: iOS — TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 90
+
+    integrations:
+      app_store_connect: qawaid_asc
+
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.qawaid.qawaidFiqhiyya
+      groups:
+        - appstore          # يحوي APP_STORE_APPLE_ID
+
+    cache:
+      cache_paths:
+        - $HOME/.pub-cache
+        - $HOME/Library/Caches/CocoaPods
+
+    scripts:
+      - name: تثبيت الحزم
+        <<: *flutter_dir
+        script: flutter pub get
+
+      - name: تحليل الكود
+        <<: *flutter_dir
+        script: flutter analyze
+
+      - name: الاختبارات
+        <<: *flutter_dir
+        script: flutter test
+
+      - name: تثبيت CocoaPods
+        <<: *flutter_dir
+        script: |
+          # لا Podfile في المستودع (أُنشئ المشروع على ويندوز)؛ Flutter ينشئه
+          # عند أول بناء، و-execdir لا يفعل شيئاً إن لم يوجد بعد.
+          find . -name "Podfile" -execdir pod install \;
+
+      - name: تجهيز ملفات التوقيع
+        <<: *flutter_dir
+        script: xcode-project use-profiles
+
+      - name: رقم البناء التالي
+        <<: *flutter_dir
+        script: |
+          # رقم أعلى من آخر بناء في App Store Connect، وإلا رُفض الرفع
+          LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" 2>/dev/null || echo 0)
+          echo "آخر رقم بناء: $LATEST"
+          echo "BUILD_NUMBER=$((LATEST + 1))" >> $CM_ENV
+
+      - name: بناء IPA
+        <<: *flutter_dir
+        script: |
+          flutter build ipa --release \
+            --build-number="$BUILD_NUMBER" \
+            --export-options-plist=/Users/builder/export_options.plist
+
+    artifacts:
+      - app/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - app/flutter_drive.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        # لا نرسل للمراجعة تلقائياً: نراجع البناء في TestFlight أولاً
+        submit_to_app_store: false
+      email:
+        recipients:
+          - tahaat659@gmail.com
+        notify:
+          success: true
+          failure: true
+
+  # ─────────────────────── أندرويد ───────────────────────
+  android-play:
+    name: Android — Google Play
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+
+    environment:
+      flutter: stable
+      android_signing:
+        - qawaid_keystore   # ارفع qawaid-upload.jks إلى Codemagic بهذا الاسم
+      groups:
+        - google_play       # يحوي GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+
+    cache:
+      cache_paths:
+        - $HOME/.pub-cache
+        - $HOME/.gradle/caches
+
+    scripts:
+      - name: تثبيت الحزم
+        <<: *flutter_dir
+        script: flutter pub get
+
+      - name: تحليل الكود
+        <<: *flutter_dir
+        script: flutter analyze
+
+      - name: الاختبارات
+        <<: *flutter_dir
+        script: flutter test
+
+      - name: بناء حزمة Play
+        <<: *flutter_dir
+        script: |
+          flutter build appbundle --release \
+            --build-number="$PROJECT_BUILD_NUMBER"
+
+    artifacts:
+      - app/build/app/outputs/bundle/release/*.aab
+      - app/build/app/outputs/**/mapping.txt
+
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal          # غيّرها إلى alpha بعد اكتمال الاختبار المغلق
+        submit_as_draft: false
+      email:
+        recipients:
+          - tahaat659@gmail.com
+        notify:
+          success: true
+          failure: true
