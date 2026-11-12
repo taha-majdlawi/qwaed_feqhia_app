@@ -77,7 +77,7 @@ TestFlight تلقائياً. ملف الإعداد [codemagic.yaml](../codemagic
 
 **أ. تكامل App Store Connect**
 `Teams ← Integrations ← Apple Developer Portal ← Add key`:
-- Name: **`qawaid_asc`** ← الاسم مهم، هو المكتوب في `codemagic.yaml`
+- Name: **`feqh_asc`** ← الاسم مهم، هو المكتوب في `codemagic.yaml`
 - الصق Issuer ID و Key ID وارفع ملف `.p8`
 
 **ب. متغيّرات البيئة**

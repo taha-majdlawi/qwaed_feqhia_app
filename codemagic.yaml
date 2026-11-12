@@ -4,7 +4,7 @@
 # يبدأ بالدخول إلى $CM_BUILD_DIR/app.
 #
 # قبل أول تشغيل، اضبط في Codemagic (انظر store/CODEMAGIC.md):
-#   • تكامل App Store Connect باسم  qawaid_asc
+#   • تكامل App Store Connect باسم  feqh_asc
 #   • متغيّر APP_STORE_APPLE_ID في مجموعة  appstore
 #   • (لأندرويد) ملف المفتاح والكلمات في مجموعة  google_play
 
@@ -20,7 +20,7 @@ workflows:
     max_build_duration: 90
 
     integrations:
-      app_store_connect: qawaid_asc
+      app_store_connect: feqh_asc
 
     environment:
       flutter: stable
