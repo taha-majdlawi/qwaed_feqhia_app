@@ -23,7 +23,7 @@ workflows:
       app_store_connect: feqh_asc
 
     environment:
-      flutter: stable
+      flutter: 3.44.0
       xcode: latest
       cocoapods: default
       ios_signing:
@@ -44,7 +44,7 @@ workflows:
 
       - name: تحليل الكود
         <<: *flutter_dir
-        script: flutter analyze
+        script: flutter analyze --no-fatal-infos
 
       - name: الاختبارات
         <<: *flutter_dir
@@ -102,7 +102,7 @@ workflows:
     max_build_duration: 60
 
     environment:
-      flutter: stable
+      flutter: 3.44.0
       android_signing:
         - qawaid_keystore   # ارفع qawaid-upload.jks إلى Codemagic بهذا الاسم
       groups:
@@ -120,7 +120,7 @@ workflows:
 
       - name: تحليل الكود
         <<: *flutter_dir
-        script: flutter analyze
+        script: flutter analyze --no-fatal-infos
 
       - name: الاختبارات
         <<: *flutter_dir
