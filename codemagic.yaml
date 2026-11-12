@@ -5,7 +5,7 @@
 #
 # قبل أول تشغيل، اضبط في Codemagic (انظر store/CODEMAGIC.md):
 #   • تكامل App Store Connect باسم  feqh_asc
-#   • متغيّر APP_STORE_APPLE_ID في مجموعة  appstore
+#   • APP_STORE_APPLE_ID معرّف في الملف نفسه
 #   • (لأندرويد) ملف المفتاح والكلمات في مجموعة  google_play
 
 definitions:
@@ -29,8 +29,8 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.qawaid.qawaidFiqhiyya
-      groups:
-        - appstore          # يحوي APP_STORE_APPLE_ID
+      vars:
+        APP_STORE_APPLE_ID: 6833844489   # معرّف التطبيق في App Store Connect
 
     cache:
       cache_paths:
