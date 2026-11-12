@@ -84,9 +84,10 @@ workflows:
     publishing:
       app_store_connect:
         auth: integration
-        submit_to_testflight: true
-        # لا نرسل للمراجعة تلقائياً: نراجع البناء في TestFlight أولاً
-        submit_to_app_store: false
+        submit_to_testflight: false
+        # إرسال البناء مباشرة إلى مراجعة App Store (النشر)، لا TestFlight
+        submit_to_app_store: true
+        release_type: AFTER_APPROVAL   # يُنشر تلقائياً فور موافقة Apple
       email:
         recipients:
           - tahaat659@gmail.com
