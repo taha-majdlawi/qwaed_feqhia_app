@@ -15,7 +15,7 @@ definitions:
 workflows:
   # ───────────────────────── iOS ─────────────────────────
   ios-testflight:
-    name: iOS — TestFlight
+    name: iOS — App Store
     instance_type: mac_mini_m2
     max_build_duration: 90
 
