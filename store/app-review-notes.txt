@@ -1,0 +1,23 @@
+1. Screen recording (captured on a physical iPhone, latest iOS, from app launch through the typical user flow):
+[VIDEO LINK]
+
+2. Purpose and target audience
+"Al-Qawa'id Al-Fiqhiyya wa Tatbiqatuha" ("Islamic Legal Maxims and Their Applications") is an audio-and-text app for Arabic-speaking Muslims, especially students of Islamic law. It presents a 61-episode lecture series by Dr. Adnan bin Awad Al-Rasheedi (Faculty of Sharia, Kuwait University). Each episode's transcript is highlighted in sync with the audio, so listeners can follow along and jump to any paragraph. The app also provides full-text search across all episodes, an index of 460+ maxims quoted in the series, offline downloads, favorites and bookmarks, playback speed, sleep timer, and resume-where-you-left-off.
+
+3. How to use the app (no account, no sign-in, no purchases)
+- Launch the app and tap "Continue" on the welcome screen.
+- Episodes tab: tap any episode to open the player and play it; the current paragraph is highlighted and follows the audio. Tap a paragraph to jump to it.
+- Search tab: type a word or phrase (or tap a suggested maxim) to search all episode transcripts.
+- Rules tab: index of maxims; tap one to see every place it appears.
+- Library tab: favorites and bookmarks. Settings tab: appearance, text size, playback options, downloads, contact.
+- The download icon on an episode saves it for offline listening.
+No login credentials or sample files are needed.
+
+4. External services
+The only external service is GitHub Releases (HTTPS), used purely as a file host for the episode audio files. The app uses no analytics, advertising, authentication, payment, or AI services and collects no user data. Transcripts, fonts and images are bundled inside the app.
+
+5. Regional differences
+None. The app and its content are identical in all regions and function consistently everywhere.
+
+6. Third-party material and authorization
+The app contains no content owned by an unrelated third party. The developer works directly with the speaker, Dr. Adnan bin Awad Al-Rasheedi, and a friend of his who acts on his behalf; the audio and transcripts of his own lecture series were provided by them for this app, and the app is published at their request. The series was originally broadcast on Kuwait Holy Quran Radio (credited in the app as the source). The app is not in a regulated industry and requires no professional credentials. We can provide further written confirmation from the speaker on request.
